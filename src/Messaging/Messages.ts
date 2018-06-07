@@ -1,4 +1,17 @@
 export enum Exchange {
+  BatcherGetHashesRequest = 'BATCHER::GET_HASHES_REQEUST',
+  BatcherGetHashesSuccess = 'BATCHER::GET_HASHES_SUCCESS',
+  BatcherGetHashesFailure = 'BATCHER::GET_HASHES_FAILURE',
+  BatcherCompleteHashesRequest = 'BATCHER::COMPLETE_HASHES_REQEUST',
+  BatcherCompleteHashesSuccess = 'BATCHER::COMPLETE_HASHES_SUCCESS',
+  BatcherCompleteHashesFailure = 'BATCHER::COMPLETE_HASHES_FAILURE',
+  StorageAddFilesToDirectoryRequest = 'STORAGE::ADD_FILES_TO_DIRECTORY_REQUEST',
+  StorageAddFilesToDirectorySuccess = 'STORAGE::ADD_FILES_TO_DIRECTORY_SUCCESS',
+  StorageAddFilesToDirectoryFailure = 'STORAGE::ADD_FILES_TO_DIRECTORY_FAILURE',
+  BlockChainWriterTimestampRequest = 'BLOCKCHAINWRITER::TIMESTAMP_REQUEST',
+  BlockchainWriterTimestampSuccess = 'BLOCKCHAINWRITER::TIMESTAMP_SUCCESS',
+  BlockchainWriterTimestampFailure = 'BLOCKCHAINWRITER::TIMESTAMP_FAILURE',
+
   // Event, a new claim has been submitted by a client
   NewClaim = 'NEW_CLAIM',
   // Event, the IPFS hash of a claim has been discovered

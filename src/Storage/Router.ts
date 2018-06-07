@@ -27,6 +27,8 @@ export class Router {
   async start() {
     await this.messaging.consume(Exchange.NewClaim, this.onNewClaim)
     await this.messaging.consumePoetTimestampsDownloaded(this.onPoetTimestampsDownloaded)
+    await this.messaging.consume(Exchange.StorageAddFilesToDirectoryRequest, this.onStorageAddFilesToDirectoryRequest)
+    await this.messaging.consume(Exchange.BatcherGetHashesSuccess, this.onBatcherGetHashesSuccess)
   }
 
   onNewClaim = async (message: any): Promise<void> => {
@@ -59,5 +61,35 @@ export class Router {
     )
 
     await this.claimController.download(poetTimestamps.map(_ => _.ipfsHash))
+  }
+
+  // TODO:: still needs to be modified to get the correct info from message and publish the correct data.
+  onBatcherGetHashesSuccess = async (message: any) => {
+    const messageContent = message.content.toString()
+    const hashes = JSON.parse(messageContent)
+    this.messaging.publish(Exchange.StorageAddFilesToDirectoryRequest, hashes)
+  }
+
+  // TODO:: still needs to be modified to get the correct info from message and publish the correct data.
+  onStorageAddFilesToDirectoryRequest = async (message: any) => {
+    const messageContent = message.content.toString()
+    const fileHashes = JSON.parse(messageContent)
+
+    try {
+      const { directoryHash } = await this.claimController.addFilesToDirectory({ fileHashes })
+      this.messaging.publish(Exchange.StorageAddFilesToDirectorySuccess, { fileHashes, directoryHash })
+    } catch (error) {
+      this.logger.error(
+        {
+          method: 'onStorageAddFilesToDirectoryRequest',
+          error,
+        },
+        'Uncaught Exception while adding file hashes to a directory Claim'
+      )
+      this.messaging.publish(
+        Exchange.StorageAddFilesToDirectoryFailure,
+        'Uncaught Exception while adding file hashes to a directory Claim'
+      )
+    }
   }
 }

@@ -24,10 +24,19 @@ export class Router {
   }
 
   async start() {
-    await this.messaging.consume(Exchange.ClaimIPFSHash, this.onClaimIPFSHash)
+    await this.messaging.consume(Exchange.StorageAddFilesToDirectorySuccess, this.onStorageAddFilesToDirectorySuccess)
+    await this.messaging.consume(Exchange.BlockChainWriterTimestampRequest, this.onBlockChainWriterTimestampRequest)
   }
 
-  onClaimIPFSHash = async (message: any): Promise<void> => {
+  // TODO:: still needs to be modified to get the correct info from message and publish the correct data.
+  onStorageAddFilesToDirectorySuccess = async (message: any): Promise<void> => {
+    const messageContent = message.content.toString()
+    const { claimId, ipfsHash } = JSON.parse(messageContent)
+    this.messaging.publish(Exchange.BlockChainWriterTimestampRequest, { claimId, ipfsHash })
+  }
+
+  // TODO:: still needs to be modified to get the correct info from message and publish the correct data.
+  onBlockChainWriterTimestampRequest = async (message: any): Promise<void> => {
     const logger = this.logger.child({ method: 'onClaimIPFSHash' })
 
     const messageContent = message.content.toString()
@@ -43,6 +52,8 @@ export class Router {
 
     try {
       await this.claimController.requestTimestamp(ipfsHash)
+      // PUBLISH THE TIMESTAMPED DIRECTORY HASH AND FILE HASHES SO THEY CAN BE UPDATED. MIGHT ALSO NEED TO PUBLISH EACH FILES CLAIM ID?
+      this.messaging.publish(Exchange.BlockchainWriterTimestampSuccess, { claimId, ipfsHash })
     } catch (exception) {
       logger.error(
         {
@@ -52,6 +63,7 @@ export class Router {
         },
         'Uncaught Exception while requesting timestamp'
       )
+      this.messaging.publish(Exchange.BlockchainWriterTimestampFailure, {})
     }
   }
 }
