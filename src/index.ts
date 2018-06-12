@@ -6,6 +6,7 @@ import * as Pino from 'pino'
 import 'reflect-metadata'
 
 import { API } from 'API/API'
+import { Batcher } from 'Batcher/Batcher'
 import { BlockchainReader } from 'BlockchainReader/BlockchainReader'
 import { BlockchainWriter } from 'BlockchainWriter/BlockchainWriter'
 import { loadConfigurationWithDefaults } from 'Configuration'
@@ -45,6 +46,18 @@ async function main() {
     await api.start()
   } catch (exception) {
     logger.error({ exception }, 'API was unable to start')
+  }
+
+  const batcher = new Batcher({
+    ...loggingConfiguration,
+    batchIntervalInMinutes: configuration.batchIntervalInMinutes,
+    dbUrl: configuration.mongodbUrl,
+    rabbitmqUrl: configuration.rabbitmqUrl,
+  })
+  try {
+    await batcher.start()
+  } catch (exception) {
+    logger.error({ exception }, 'Batcher was unable to start')
   }
 
   const view = new View({

@@ -27,6 +27,8 @@ export interface Configuration extends LoggingConfiguration {
   readonly downloadRetryDelayInMinutes: number
   readonly downloadMaxAttempts: number
   readonly downloadTimeoutInSeconds: number
+
+  readonly batchIntervalInMinutes: number
 }
 
 export interface LoggingConfiguration {
@@ -56,6 +58,8 @@ const defaultConfiguration: Configuration = {
 
   loggingLevel: 'info',
   loggingPretty: true,
+
+  batchIntervalInMinutes: 10,
 }
 
 export const configurationPath = () => path.join(homedir(), '/.po.et/configuration.json')
