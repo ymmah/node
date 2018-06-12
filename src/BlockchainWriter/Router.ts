@@ -28,42 +28,39 @@ export class Router {
     await this.messaging.consume(Exchange.BlockChainWriterTimestampRequest, this.onBlockChainWriterTimestampRequest)
   }
 
-  // TODO:: still needs to be modified to get the correct info from message and publish the correct data.
   onStorageAddFilesToDirectorySuccess = async (message: any): Promise<void> => {
     const messageContent = message.content.toString()
-    const { claimId, ipfsHash } = JSON.parse(messageContent)
-    this.messaging.publish(Exchange.BlockChainWriterTimestampRequest, { claimId, ipfsHash })
+    const { fileHashes, directoryHash } = JSON.parse(messageContent)
+    this.messaging.publish(Exchange.BlockChainWriterTimestampRequest, { fileHashes, directoryHash })
   }
 
-  // TODO:: still needs to be modified to get the correct info from message and publish the correct data.
   onBlockChainWriterTimestampRequest = async (message: any): Promise<void> => {
     const logger = this.logger.child({ method: 'onClaimIPFSHash' })
 
     const messageContent = message.content.toString()
-    const { claimId, ipfsHash } = JSON.parse(messageContent)
+    const { fileHashes, directoryHash } = JSON.parse(messageContent)
 
     logger.trace(
       {
-        claimId,
-        ipfsHash,
+        fileHashes,
+        directoryHash,
       },
       'Timestamping requested'
     )
 
     try {
-      await this.claimController.requestTimestamp(ipfsHash)
-      // PUBLISH THE TIMESTAMPED DIRECTORY HASH AND FILE HASHES SO THEY CAN BE UPDATED. MIGHT ALSO NEED TO PUBLISH EACH FILES CLAIM ID?
-      this.messaging.publish(Exchange.BlockchainWriterTimestampSuccess, { claimId, ipfsHash })
+      await this.claimController.requestTimestamp(directoryHash)
+      this.messaging.publish(Exchange.BlockchainWriterTimestampSuccess, { fileHashes, directoryHash })
     } catch (exception) {
       logger.error(
         {
           exception,
-          claimId,
-          ipfsHash,
+          directoryHash,
+          fileHashes,
         },
         'Uncaught Exception while requesting timestamp'
       )
-      this.messaging.publish(Exchange.BlockchainWriterTimestampFailure, {})
+      this.messaging.publish(Exchange.BlockchainWriterTimestampFailure, { error: exception, fileHashes, directoryHash })
     }
   }
 }

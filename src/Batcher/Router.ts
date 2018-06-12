@@ -48,11 +48,10 @@ export class Router {
     }
   }
 
-  // TODO:: still needs to be modified to get the correct info from message and publish the correct data.
   onBatcherGetHashesRequest = async (): Promise<void> => {
     try {
-      const items = await this.database.getItems()
-      this.messaging.publish(Exchange.BatcherGetHashesSuccess, items)
+      const fileHashes = await this.database.getItems()
+      this.messaging.publish(Exchange.BatcherGetHashesSuccess, { fileHashes })
     } catch (error) {
       this.logger.error(
         {
@@ -61,22 +60,22 @@ export class Router {
         },
         'Uncaught Exception while getting hashes to be batched'
       )
-      this.messaging.publish(Exchange.BatcherGetHashesFailure, 'Uncaught Exception while getting hashes to be batched')
+      this.messaging.publish(Exchange.BatcherGetHashesFailure, { error })
     }
   }
 
-  // TODO:: still needs to be modified to get the correct info from message and publish the correct data.
   onBlockchainWriterTimestampSuccess = (message: any): void => {
-    this.messaging.publish(Exchange.BatcherCompleteHashesRequest, {})
+    const messageContent = message.content.toString()
+    const { fileHashes, directoryHash } = JSON.parse(messageContent)
+    this.messaging.publish(Exchange.BatcherCompleteHashesRequest, { fileHashes, directoryHash })
   }
 
-  // TODO:: still needs to be modified to get the correct info from message and publish the correct data.
   onBatcherCompleteHashesRequest = async (message: any): Promise<void> => {
     const messageContent = message.content.toString()
-    const { fileHashes } = JSON.parse(messageContent)
+    const { fileHashes, directoryHash } = JSON.parse(messageContent)
     try {
       await this.database.completeItems(fileHashes)
-      this.messaging.publish(Exchange.BatcherCompleteHashesSuccess, { fileHashes })
+      this.messaging.publish(Exchange.BatcherCompleteHashesSuccess, { fileHashes, directoryHash })
     } catch (error) {
       this.logger.error(
         {
@@ -85,7 +84,7 @@ export class Router {
         },
         'Uncaught Exception while adding item to be batched'
       )
-      this.messaging.publish(Exchange.BatcherCompleteHashesFailure, { fileHashes })
+      this.messaging.publish(Exchange.BatcherCompleteHashesFailure, { error, fileHashes, directoryHash })
     }
   }
 }

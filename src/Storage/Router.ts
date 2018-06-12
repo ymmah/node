@@ -63,17 +63,15 @@ export class Router {
     await this.claimController.download(poetTimestamps.map(_ => _.ipfsHash))
   }
 
-  // TODO:: still needs to be modified to get the correct info from message and publish the correct data.
   onBatcherGetHashesSuccess = async (message: any) => {
     const messageContent = message.content.toString()
-    const hashes = JSON.parse(messageContent)
-    this.messaging.publish(Exchange.StorageAddFilesToDirectoryRequest, hashes)
+    const { fileHashes } = JSON.parse(messageContent)
+    this.messaging.publish(Exchange.StorageAddFilesToDirectoryRequest, { fileHashes })
   }
 
-  // TODO:: still needs to be modified to get the correct info from message and publish the correct data.
   onStorageAddFilesToDirectoryRequest = async (message: any) => {
     const messageContent = message.content.toString()
-    const fileHashes = JSON.parse(messageContent)
+    const { fileHashes } = JSON.parse(messageContent)
 
     try {
       const { directoryHash } = await this.claimController.addFilesToDirectory({ fileHashes })
@@ -86,10 +84,10 @@ export class Router {
         },
         'Uncaught Exception while adding file hashes to a directory Claim'
       )
-      this.messaging.publish(
-        Exchange.StorageAddFilesToDirectoryFailure,
-        'Uncaught Exception while adding file hashes to a directory Claim'
-      )
+      this.messaging.publish(Exchange.StorageAddFilesToDirectoryFailure, {
+        error,
+        fileHashes,
+      })
     }
   }
 }
