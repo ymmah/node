@@ -46,11 +46,7 @@ export class DirectoryCollection {
           $or: [{ successTime: null }, { successTime: { $exists: false } }],
         },
         {
-          $or: [
-            { attempts: null },
-            { attempts: { $exists: false } },
-            { attempts: { $lte: maxAttempts } },
-          ],
+          $or: [{ attempts: null }, { attempts: { $exists: false } }, { attempts: { $lte: maxAttempts } }],
         },
       ],
     })
@@ -63,7 +59,7 @@ export class DirectoryCollection {
       }
     )
 
-  incDownloadAttempts = async ({ hash, time = new Date().getTime() }: { hash: string; time?: number }) =>
+  inAttempts = async ({ hash, time = new Date().getTime() }: { hash: string; time?: number }) =>
     await this.collection.updateOne(
       { hash },
       {
