@@ -80,24 +80,6 @@ export class Router {
     this.messaging.publish(Exchange.StorageAddFilesToDirectoryRequest, { fileHashes })
   }
 
-  onStorageGetFilesHashesFromNextDirectoryRequest = async (message: any) => {
-    try {
-      const directoryHash = await this.directoryCollection.findItem({ maxAttempts: 20, retryDelay: 20 })
-      const fileHashes = await this.ipfs.getDirectoryFileHashes(directoryHash)
-      await this.claimController.download(fileHashes)
-      this.messaging.publish(Exchange.StorageGetFilesHashesFromNextDirectorySuccess, { directoryHash, fileHashes })
-    } catch (error) {
-      this.logger.error(
-        {
-          method: 'onStorageGetFilesHashesFromNextDirectoryRequest',
-          error,
-        },
-        'Uncaught Exception while getting file hashes from the next directory'
-      )
-      this.messaging.publish(Exchange.StorageGetFilesHashesFromNextDirectoryFailure, { error })
-    }
-  }
-
   onStorageAddFilesToDirectoryRequest = async (message: any) => {
     const messageContent = message.content.toString()
     const { fileHashes } = JSON.parse(messageContent)
@@ -117,6 +99,26 @@ export class Router {
         error,
         fileHashes,
       })
+    }
+  }
+
+  onStorageGetFilesHashesFromNextDirectoryRequest = async (message: any) => {
+    try {
+      const directoryHash = await this.directoryCollection.findItem({ maxAttempts: 20, retryDelay: 20 })
+      await this.directoryCollection.inAttempts({ hash: directoryHash })
+      const fileHashes = await this.ipfs.getDirectoryFileHashes(directoryHash)
+      await this.claimController.download(fileHashes)
+      await this.directoryCollection.setSuccessTime({ hash: directoryHash })
+      this.messaging.publish(Exchange.StorageGetFilesHashesFromNextDirectorySuccess, { directoryHash, fileHashes })
+    } catch (error) {
+      this.logger.error(
+        {
+          method: 'onStorageGetFilesHashesFromNextDirectoryRequest',
+          error,
+        },
+        'Uncaught Exception while getting file hashes from the next directory'
+      )
+      this.messaging.publish(Exchange.StorageGetFilesHashesFromNextDirectoryFailure, { error })
     }
   }
 }

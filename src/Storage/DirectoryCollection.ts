@@ -15,9 +15,9 @@ export class DirectoryCollection {
     await this.collection.insertMany(
       hashes.map(hash => ({
         hash,
-        lastDownloadAttemptTime: null,
-        downloadSuccessTime: null,
-        downloadAttempts: 0,
+        lastAttemptTime: null,
+        successTime: null,
+        attempts: 0,
       })),
       { ordered: false }
     )
@@ -37,29 +37,29 @@ export class DirectoryCollection {
       $and: [
         {
           $or: [
-            { lastDownloadAttemptTime: null },
-            { lastDownloadAttemptTime: { $exists: false } },
-            { lastDownloadAttemptTime: { $lt: currentTime - retryDelay } },
+            { lastAttemptTime: null },
+            { lastAttemptTime: { $exists: false } },
+            { lastAttemptTime: { $lt: currentTime - retryDelay } },
           ],
         },
         {
-          $or: [{ downloadSuccessTime: null }, { downloadSuccessTime: { $exists: false } }],
+          $or: [{ successTime: null }, { successTime: { $exists: false } }],
         },
         {
           $or: [
-            { downloadAttempts: null },
-            { downloadAttempts: { $exists: false } },
-            { downloadAttempts: { $lte: maxAttempts } },
+            { attempts: null },
+            { attempts: { $exists: false } },
+            { attempts: { $lte: maxAttempts } },
           ],
         },
       ],
     })
 
-  setDownloadSuccessTime = async ({ hash, time = new Date().getTime() }: { hash: string; time?: number }) =>
+  setSuccessTime = async ({ hash, time = new Date().getTime() }: { hash: string; time?: number }) =>
     await this.collection.updateOne(
       { hash },
       {
-        $set: { downloadSuccessTime: time },
+        $set: { successTime: time },
       }
     )
 
@@ -67,8 +67,8 @@ export class DirectoryCollection {
     await this.collection.updateOne(
       { hash },
       {
-        $set: { lastDownloadAttemptTime: time },
-        $inc: { downloadAttempts: 1 },
+        $set: { lastAttemptTime: time },
+        $inc: { attempts: 1 },
       }
     )
 }
