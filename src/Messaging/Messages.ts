@@ -11,6 +11,7 @@ export enum Exchange {
   StorageGetFilesHashesFromNextDirectoryRequest = 'STORAGE::GET_FILES_HASHES_FROM_NEXT_DIRECTORY_REQUEST',
   StorageGetFilesHashesFromNextDirectorySuccess = 'STORAGE::GET_FILES_HASHES_FROM_NEXT_DIRECTORY_SUCCESS',
   StorageGetFilesHashesFromNextDirectoryFailure = 'STORAGE::GET_FILES_HASHES_FROM_NEXT_DIRECTORY_FAILURE',
+  BlockchainWriterTimestampRequest = 'BLOCKCHAINWRITER::TIMESTAMP_REQUEST',
   BlockchainWriterTimestampSuccess = 'BLOCKCHAINWRITER::TIMESTAMP_SUCCESS',
   BlockchainWriterTimestampFailure = 'BLOCKCHAINWRITER::TIMESTAMP_FAILURE',
 
