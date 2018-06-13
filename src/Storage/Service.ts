@@ -13,7 +13,8 @@ import { ServiceConfiguration } from './ServiceConfiguration'
 export class Service {
   private readonly logger: Pino.Logger
   private readonly claimController: ClaimController
-  private readonly interval: Interval
+  private readonly downloadNextHashInterval: Interval
+  private readonly getFilesFromNextDirecotryInterval: Interval
   private readonly messaging: Messaging
 
   constructor(
@@ -25,19 +26,21 @@ export class Service {
     this.logger = childWithFileName(logger, __filename)
     this.claimController = claimController
     this.messaging = this.messaging
-    this.interval = new Interval(this.downloadNextHash, 1000 * configuration.downloadIntervalInSeconds)
-    this.interval = new Interval(
+    this.downloadNextHashInterval = new Interval(this.downloadNextHash, 1000 * configuration.downloadIntervalInSeconds)
+    this.getFilesFromNextDirecotryInterval = new Interval(
       this.getFilesHashesFromNextDirectory,
       1000 * configuration.getFileHashesFromDirecotryIntervalInSeconds
     )
   }
 
   async start() {
-    this.interval.start()
+    this.downloadNextHashInterval.start()
+    this.getFilesFromNextDirecotryInterval.start()
   }
 
   stop() {
-    this.interval.stop()
+    this.downloadNextHashInterval.stop()
+    this.getFilesFromNextDirecotryInterval.start()
   }
 
   private downloadNextHash = async () => {
