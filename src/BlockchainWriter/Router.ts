@@ -25,16 +25,16 @@ export class Router {
 
   async start() {
     await this.messaging.consume(Exchange.StorageAddFilesToDirectorySuccess, this.onStorageAddFilesToDirectorySuccess)
-    await this.messaging.consume(Exchange.BlockChainWriterTimestampRequest, this.onBlockChainWriterTimestampRequest)
+    await this.messaging.consume(Exchange.BlockchainWriterTimestampRequest, this.onBlockchainWriterTimestampRequest)
   }
 
   onStorageAddFilesToDirectorySuccess = async (message: any): Promise<void> => {
     const messageContent = message.content.toString()
     const { fileHashes, directoryHash } = JSON.parse(messageContent)
-    this.messaging.publish(Exchange.BlockChainWriterTimestampRequest, { fileHashes, directoryHash })
+    this.messaging.publish(Exchange.BlockchainWriterTimestampRequest, { fileHashes, directoryHash })
   }
 
-  onBlockChainWriterTimestampRequest = async (message: any): Promise<void> => {
+  onBlockchainWriterTimestampRequest = async (message: any): Promise<void> => {
     const logger = this.logger.child({ method: 'onClaimIPFSHash' })
 
     const messageContent = message.content.toString()
