@@ -28,6 +28,8 @@ export interface Configuration extends LoggingConfiguration {
   readonly downloadMaxAttempts: number
   readonly downloadTimeoutInSeconds: number
 
+  readonly getFileHashesFromDirecotryIntervalInSeconds: number
+
   readonly batchIntervalInMinutes: number
 }
 
@@ -44,7 +46,7 @@ const defaultConfiguration: Configuration = {
 
   apiPort: 18080,
   poetNetwork: 'BARD',
-  poetVersion: [0, 0, 0, 2],
+  poetVersion: [0, 0, 0, 3],
   minimumBlockHeight: 1279550, // Less than 24 hours before Feb 8th, 2018 - Frost's Release
   blockchainReaderIntervalInSeconds: 5,
 
@@ -55,6 +57,8 @@ const defaultConfiguration: Configuration = {
   downloadRetryDelayInMinutes: 10,
   downloadMaxAttempts: 20,
   downloadTimeoutInSeconds: 10,
+
+  getFileHashesFromDirecotryIntervalInSeconds: 5,
 
   loggingLevel: 'info',
   loggingPretty: true,

@@ -20,14 +20,12 @@ export class IPFS {
     this.downloadTimeoutInSeconds = configuration.downloadTimeoutInSeconds
   }
 
-  // we could add an integration tests for this function
   createEmptyDirectory = async (): Promise<string> => {
     const response = await fetch(`${this.url}/api/v0/object/new?arg=unixfs-dir`)
     const json = await response.json()
     return json.Hash
   }
 
-  // we could add an integration tests for this function
   addFileToDirectory = async (directoryHash: string, fileHash: string): Promise<string> => {
     const response = await fetch(
       `${this.url}/api/v0//api/v0/object/pach/add-link?arg=${directoryHash}&arg=${fileHash}&arg=${fileHash}`
@@ -36,7 +34,17 @@ export class IPFS {
     return json.Hash
   }
 
-  // we could add an integration tests for this function
+  ls = async (hash: string): Promise<any> => {
+    const response = await fetch(`${this.url}/api/v0/file/ls?arg=${hash}`)
+    const json = await response.json()
+    return json
+  }
+
+  getDirectoryFileHashes = async (hash: string) => {
+    const response = await this.ls(hash)
+    return response.Objects[hash].links
+  }
+
   addFilesToDirectory = async ({
     directoryHash,
     fileHashes = [],

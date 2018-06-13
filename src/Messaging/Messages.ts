@@ -8,7 +8,9 @@ export enum Exchange {
   StorageAddFilesToDirectoryRequest = 'STORAGE::ADD_FILES_TO_DIRECTORY_REQUEST',
   StorageAddFilesToDirectorySuccess = 'STORAGE::ADD_FILES_TO_DIRECTORY_SUCCESS',
   StorageAddFilesToDirectoryFailure = 'STORAGE::ADD_FILES_TO_DIRECTORY_FAILURE',
-  BlockChainWriterTimestampRequest = 'BLOCKCHAINWRITER::TIMESTAMP_REQUEST',
+  StorageGetFilesHashesFromNextDirectoryRequest = 'STORAGE::GET_FILES_HASHES_FROM_NEXT_DIRECTORY_REQUEST',
+  StorageGetFilesHashesFromNextDirectorySuccess = 'STORAGE::GET_FILES_HASHES_FROM_NEXT_DIRECTORY_SUCCESS',
+  StorageGetFilesHashesFromNextDirectoryFailure = 'STORAGE::GET_FILES_HASHES_FROM_NEXT_DIRECTORY_FAILURE',
   BlockchainWriterTimestampSuccess = 'BLOCKCHAINWRITER::TIMESTAMP_SUCCESS',
   BlockchainWriterTimestampFailure = 'BLOCKCHAINWRITER::TIMESTAMP_FAILURE',
 

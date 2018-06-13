@@ -7,21 +7,29 @@ import { Exchange } from 'Messaging/Messages'
 import { Messaging } from 'Messaging/Messaging'
 
 import { ClaimController } from './ClaimController'
+import { DirectoryCollection } from './DirectoryCollection'
+import { IPFS } from './IPFS'
 
 @injectable()
 export class Router {
   private readonly logger: Pino.Logger
   private readonly messaging: Messaging
   private readonly claimController: ClaimController
+  private readonly directoryCollection: DirectoryCollection
+  private readonly ipfs: IPFS
 
   constructor(
     @inject('Logger') logger: Pino.Logger,
     @inject('Messaging') messaging: Messaging,
-    @inject('ClaimController') claimController: ClaimController
+    @inject('ClaimController') claimController: ClaimController,
+    @inject('DirectoryCollection') directoryCollection: DirectoryCollection,
+    @inject('IPFS') ipfs: IPFS
   ) {
     this.logger = childWithFileName(logger, __filename)
     this.messaging = messaging
     this.claimController = claimController
+    this.directoryCollection = directoryCollection
+    this.ipfs = ipfs
   }
 
   async start() {
@@ -29,6 +37,10 @@ export class Router {
     await this.messaging.consumePoetTimestampsDownloaded(this.onPoetTimestampsDownloaded)
     await this.messaging.consume(Exchange.StorageAddFilesToDirectoryRequest, this.onStorageAddFilesToDirectoryRequest)
     await this.messaging.consume(Exchange.BatcherGetHashesSuccess, this.onBatcherGetHashesSuccess)
+    await this.messaging.consume(
+      Exchange.StorageGetFilesHashesFromNextDirectoryRequest,
+      this.onStorageGetFilesHashesFromNextDirectoryRequest
+    )
   }
 
   onNewClaim = async (message: any): Promise<void> => {
@@ -59,14 +71,31 @@ export class Router {
       },
       'Downloading Claims from IPFS'
     )
-
-    await this.claimController.download(poetTimestamps.map(_ => _.ipfsHash))
+    await this.directoryCollection.addItems(poetTimestamps.map(_ => _.ipfsHash))
   }
 
   onBatcherGetHashesSuccess = async (message: any) => {
     const messageContent = message.content.toString()
     const { fileHashes } = JSON.parse(messageContent)
     this.messaging.publish(Exchange.StorageAddFilesToDirectoryRequest, { fileHashes })
+  }
+
+  onStorageGetFilesHashesFromNextDirectoryRequest = async (message: any) => {
+    try {
+      const directoryHash = await this.directoryCollection.findItem({ maxAttempts: 20, retryDelay: 20 })
+      const fileHashes = await this.ipfs.getDirectoryFileHashes(directoryHash)
+      await this.claimController.download(fileHashes)
+      this.messaging.publish(Exchange.StorageGetFilesHashesFromNextDirectorySuccess, { directoryHash, fileHashes })
+    } catch (error) {
+      this.logger.error(
+        {
+          method: 'onStorageGetFilesHashesFromNextDirectoryRequest',
+          error,
+        },
+        'Uncaught Exception while getting file hashes from the next directory'
+      )
+      this.messaging.publish(Exchange.StorageGetFilesHashesFromNextDirectoryFailure, { error })
+    }
   }
 
   onStorageAddFilesToDirectoryRequest = async (message: any) => {
