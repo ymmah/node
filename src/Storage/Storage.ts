@@ -7,6 +7,7 @@ import { Messaging } from 'Messaging/Messaging'
 
 import { ClaimController } from './ClaimController'
 import { ClaimControllerConfiguration } from './ClaimControllerConfiguration'
+import { DirectoryCollection } from './DirectoryCollection'
 import { IPFS } from './IPFS'
 import { IPFSConfiguration } from './IPFSConfiguration'
 import { Router } from './Router'
@@ -54,6 +55,7 @@ export class Storage {
     this.container.bind<Pino.Logger>('Logger').toConstantValue(this.logger)
     this.container.bind<Db>('DB').toConstantValue(this.dbConnection)
     this.container.bind<Router>('Router').to(Router)
+    this.container.bind<DirectoryCollection>('DirectoryCollection').to(DirectoryCollection)
     this.container.bind<IPFS>('IPFS').to(IPFS)
     this.container.bind<IPFSConfiguration>('IPFSConfiguration').toConstantValue({
       ipfsUrl: this.configuration.ipfsUrl,
@@ -68,6 +70,7 @@ export class Storage {
     this.container.bind<Service>('Service').to(Service)
     this.container.bind<ServiceConfiguration>('ServiceConfiguration').toConstantValue({
       downloadIntervalInSeconds: this.configuration.downloadIntervalInSeconds,
+      getFileHashesFromDirecotryIntervalInSeconds: this.configuration.getFileHashesFromDirecotryIntervalInSeconds,
     })
   }
 

@@ -63,7 +63,7 @@ const defaultConfiguration: Configuration = {
   loggingLevel: 'info',
   loggingPretty: true,
 
-  batchIntervalInMinutes: 10,
+  batchIntervalInMinutes: 0.5,
 }
 
 export const configurationPath = () => path.join(homedir(), '/.po.et/configuration.json')

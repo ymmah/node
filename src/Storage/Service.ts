@@ -25,7 +25,7 @@ export class Service {
   ) {
     this.logger = childWithFileName(logger, __filename)
     this.claimController = claimController
-    this.messaging = this.messaging
+    this.messaging = messaging
     this.downloadNextHashInterval = new Interval(this.downloadNextHash, 1000 * configuration.downloadIntervalInSeconds)
     this.getFilesFromNextDirecotryInterval = new Interval(
       this.getFilesHashesFromNextDirectory,

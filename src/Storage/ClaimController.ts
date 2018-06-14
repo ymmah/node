@@ -38,12 +38,6 @@ export class ClaimController {
     this.ipfs = ipfs
   }
 
-  addFilesToDirectory = async ({ fileHashes = [] }: { fileHashes: ReadonlyArray<string> }) => {
-    const emptyDirectoryHash = await this.ipfs.createEmptyDirectory()
-    const directoryHash = await this.ipfs.addFilesToDirectory({ directoryHash: emptyDirectoryHash, fileHashes })
-    return { directoryHash, fileHashes }
-  }
-
   async create(claim: Claim): Promise<void> {
     const logger = this.logger.child({ method: 'create' })
 

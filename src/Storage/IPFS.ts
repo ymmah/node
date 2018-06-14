@@ -28,7 +28,7 @@ export class IPFS {
 
   addFileToDirectory = async (directoryHash: string, fileHash: string): Promise<string> => {
     const response = await fetch(
-      `${this.url}/api/v0//api/v0/object/pach/add-link?arg=${directoryHash}&arg=${fileHash}&arg=${fileHash}`
+      `${this.url}/api/v0/object/patch/add-link?arg=${directoryHash}&arg=${'hash'}&arg=${fileHash}`
     )
     const json = await response.json()
     return json.Hash

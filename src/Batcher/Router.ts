@@ -6,22 +6,22 @@ import { childWithFileName } from 'Helpers/Logging'
 import { Exchange } from 'Messaging/Messages'
 import { Messaging } from 'Messaging/Messaging'
 
-import { Database } from './Database'
+import { FileHashCollection } from './FileHashCollection'
 
 @injectable()
 export class Router {
   private readonly logger: Pino.Logger
   private readonly messaging: Messaging
-  private readonly database: Database
+  private readonly fileHashCollection: FileHashCollection
 
   constructor(
     @inject('Logger') logger: Pino.Logger,
     @inject('Messaging') messaging: Messaging,
-    @inject('Database') database: Database
+    @inject('FileHashCollection') fileHashCollection: FileHashCollection
   ) {
     this.logger = childWithFileName(logger, __filename)
     this.messaging = messaging
-    this.database = database
+    this.fileHashCollection = fileHashCollection
   }
 
   async start() {
@@ -33,10 +33,10 @@ export class Router {
 
   onClaimIPFSHash = async (message: any): Promise<void> => {
     const messageContent = message.content.toString()
-    const hash = JSON.parse(messageContent)
+    const item = JSON.parse(messageContent)
 
     try {
-      await this.database.addItem({ item: hash })
+      await this.fileHashCollection.addItem({ hash: item.ipfsHash })
     } catch (error) {
       this.logger.error(
         {
@@ -50,7 +50,8 @@ export class Router {
 
   onBatcherGetHashesRequest = async (): Promise<void> => {
     try {
-      const fileHashes = await this.database.getItems()
+      const items = await this.fileHashCollection.getItems()
+      const fileHashes = items.map(x => x.hash)
       this.messaging.publish(Exchange.BatcherGetHashesSuccess, { fileHashes })
     } catch (error) {
       this.logger.error(
@@ -74,7 +75,7 @@ export class Router {
     const messageContent = message.content.toString()
     const { fileHashes, directoryHash } = JSON.parse(messageContent)
     try {
-      await this.database.completeItems(fileHashes)
+      await this.fileHashCollection.completeItems(fileHashes)
       this.messaging.publish(Exchange.BatcherCompleteHashesSuccess, { fileHashes, directoryHash })
     } catch (error) {
       this.logger.error(

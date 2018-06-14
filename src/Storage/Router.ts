@@ -77,7 +77,7 @@ export class Router {
   onBatcherGetHashesSuccess = async (message: any) => {
     const messageContent = message.content.toString()
     const { fileHashes } = JSON.parse(messageContent)
-    this.messaging.publish(Exchange.StorageAddFilesToDirectoryRequest, { fileHashes })
+    if (fileHashes.length > 0) this.messaging.publish(Exchange.StorageAddFilesToDirectoryRequest, { fileHashes })
   }
 
   onStorageAddFilesToDirectoryRequest = async (message: any) => {
@@ -85,7 +85,8 @@ export class Router {
     const { fileHashes } = JSON.parse(messageContent)
 
     try {
-      const { directoryHash } = await this.claimController.addFilesToDirectory({ fileHashes })
+      const emptyDirectoryHash = await this.ipfs.createEmptyDirectory()
+      const directoryHash = await this.ipfs.addFilesToDirectory({ directoryHash: emptyDirectoryHash, fileHashes })
       this.messaging.publish(Exchange.StorageAddFilesToDirectorySuccess, { fileHashes, directoryHash })
     } catch (error) {
       this.logger.error(
@@ -105,6 +106,7 @@ export class Router {
   onStorageGetFilesHashesFromNextDirectoryRequest = async (message: any) => {
     try {
       const directoryHash = await this.directoryCollection.findItem({ maxAttempts: 20, retryDelay: 20 })
+      if (!directoryHash) return
       await this.directoryCollection.inAttempts({ hash: directoryHash })
       const fileHashes = await this.ipfs.getDirectoryFileHashes(directoryHash)
       await this.claimController.download(fileHashes)

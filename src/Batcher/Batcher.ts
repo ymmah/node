@@ -6,6 +6,7 @@ import { createModuleLogger } from 'Helpers/Logging'
 import { Messaging } from 'Messaging/Messaging'
 
 import { BatcherConfiguration } from './BatcherConfiguration'
+import { FileHashCollection } from './FileHashCollection'
 import { Router } from './Router'
 import { Service } from './Service'
 import { ServiceConfiguration } from './ServiceConfiguration'
@@ -47,6 +48,7 @@ export class Batcher {
   initializeContainer() {
     this.container.bind<Pino.Logger>('Logger').toConstantValue(this.logger)
     this.container.bind<Db>('DB').toConstantValue(this.dbConnection)
+    this.container.bind<FileHashCollection>('FileHashCollection').to(FileHashCollection)
     this.container.bind<Router>('Router').to(Router)
     this.container.bind<Messaging>('Messaging').toConstantValue(this.messaging)
     this.container.bind<Service>('Service').to(Service)
