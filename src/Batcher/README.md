@@ -21,8 +21,8 @@ The following configuration properties affect the Batcher Module:
 #### `src/Batcher/Batcher.ts`   
 The entry point for the module.
 
-#### `src/Batcher/Database.ts`   
-Provides the necessary DB collection functions.
+#### `src/Batcher/FileHashCollection.ts`   
+Provides the necessary DB collection functions to store and manipulate file hashes.
 
 #### `src/Batcher/Router.ts`   
 Sort of the saga of the files handles the communication between the different modules.
