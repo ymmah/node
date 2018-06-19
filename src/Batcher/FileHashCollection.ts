@@ -1,8 +1,6 @@
 import { inject, injectable } from 'inversify'
 import { Collection, Db } from 'mongodb'
 
-type hashes = ReadonlyArray<string>
-
 @injectable()
 export class FileHashCollection {
   private readonly db: Db
@@ -13,14 +11,12 @@ export class FileHashCollection {
     this.collection = this.db.collection('batcher')
   }
 
-  addItem = ({ hash = "" }) => this.collection.insertOne({ hash, time: null })
+  addItem = ({ hash = '' }) => this.collection.insertOne({ hash, time: null })
 
   getItems = () => this.collection.find({ time: null }, { fields: { _id: false, hash: true } }).toArray()
 
-  completeItem = ({ hash = '', time = new Date().getTime() }) => this.collection.updateOne({ hash }, { $set: {time} })
+  completeItem = ({ hash = '', time = new Date().getTime() }) => this.collection.updateOne({ hash }, { $set: { time } })
 
-  completeItems = ({
-    hashes = [] as ReadonlyArray<string>,
-    time = new Date().getTime(),
-  }) => Promise.all(hashes.map(hash => this.completeItem({ hash, time })))
+  completeItems = ({ hashes = [] as ReadonlyArray<string>, time = new Date().getTime() }) =>
+    Promise.all(hashes.map(hash => this.completeItem({ hash, time })))
 }

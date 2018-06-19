@@ -83,7 +83,7 @@ export class Router {
       this.messaging.publish(Exchange.BatcherCompleteHashesSuccess, { fileHashes, directoryHash })
       logger.info(' Marked hashes as complete', { fileHashes, directoryHash })
     } catch (error) {
-      logger.error({error }, 'Failed to mark hashes as complete', { fileHashes, directoryHash })
+      logger.error({ error }, 'Failed to mark hashes as complete', { fileHashes, directoryHash })
       this.messaging.publish(Exchange.BatcherCompleteHashesFailure, { error, fileHashes, directoryHash })
     }
   }
