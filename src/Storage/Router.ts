@@ -104,6 +104,8 @@ export class Router {
   }
 
   onStorageGetFilesHashesFromNextDirectoryRequest = async (message: any) => {
+    const logger = this.logger.child({ method: 'onStorageGetFilesHashesFromNextDirectoryRequest' })
+    logger.trace({ poetTimestamps }, 'Downloading IPFS claim hashes from IPFS Directory hash')
     try {
       const directoryHash = await this.directoryCollection.findItem({ maxAttempts: 20, retryDelay: 20 })
       if (!directoryHash) return
@@ -113,13 +115,7 @@ export class Router {
       await this.directoryCollection.setSuccessTime({ hash: directoryHash })
       this.messaging.publish(Exchange.StorageGetFilesHashesFromNextDirectorySuccess, { directoryHash, fileHashes })
     } catch (error) {
-      this.logger.error(
-        {
-          method: 'onStorageGetFilesHashesFromNextDirectoryRequest',
-          error,
-        },
-        'Uncaught Exception while getting file hashes from the next directory'
-      )
+      logger.error({ error }, 'Error downloading IPFS claim hashes from IPFS Directory hash')
       this.messaging.publish(Exchange.StorageGetFilesHashesFromNextDirectoryFailure, { error })
     }
   }
