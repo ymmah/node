@@ -49,10 +49,12 @@ export class Router {
   }
 
   onBatcherGetHashesRequest = async (): Promise<void> => {
+    const logger = this.logger.child({ method: 'onBatcherGetHashesRequest' })
     try {
       const items = await this.fileHashCollection.getItems()
       const fileHashes = items.map(x => x.hash)
       this.messaging.publish(Exchange.BatcherGetHashesSuccess, { fileHashes })
+      logger.info('Found hashes for batching', { fileHashes })
     } catch (error) {
       this.logger.error(
         {
@@ -72,19 +74,16 @@ export class Router {
   }
 
   onBatcherCompleteHashesRequest = async (message: any): Promise<void> => {
+    const logger = this.logger.child({ method: 'onBatcherCompleteHashesRequest' })
     const messageContent = message.content.toString()
     const { fileHashes, directoryHash } = JSON.parse(messageContent)
+    logger.info('Marking hashes as complete', { fileHashes, directoryHash })
     try {
-      await this.fileHashCollection.completeItems(fileHashes)
+      await this.fileHashCollection.completeItems({ hashes: fileHashes })
       this.messaging.publish(Exchange.BatcherCompleteHashesSuccess, { fileHashes, directoryHash })
+      logger.info(' Marked hashes as complete', { fileHashes, directoryHash })
     } catch (error) {
-      this.logger.error(
-        {
-          method: 'onBatcherCompleteHashesRequest',
-          error,
-        },
-        'Uncaught Exception while adding item to be batched'
-      )
+      logger.error({error }, 'Failed to mark hashes as complete', { fileHashes, directoryHash })
       this.messaging.publish(Exchange.BatcherCompleteHashesFailure, { error, fileHashes, directoryHash })
     }
   }

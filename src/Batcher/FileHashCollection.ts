@@ -1,6 +1,8 @@
 import { inject, injectable } from 'inversify'
 import { Collection, Db } from 'mongodb'
 
+type hashes = ReadonlyArray<string>
+
 @injectable()
 export class FileHashCollection {
   private readonly db: Db
@@ -11,19 +13,14 @@ export class FileHashCollection {
     this.collection = this.db.collection('batcher')
   }
 
-  addItem = async ({ hash }: { hash: string }) => await this.collection.insertOne({ hash, time: null })
+  addItem = ({ hash = "" }) => this.collection.insertOne({ hash, time: null })
 
-  getItems = async (): Promise<any> =>
-    await this.collection.find({ time: null }, { fields: { _id: false, hash: true } }).toArray()
+  getItems = () => this.collection.find({ time: null }, { fields: { _id: false, hash: true } }).toArray()
 
-  completeItem = async ({ hash = '', time = new Date().getTime() }: { hash?: string; time?: number }): Promise<any> =>
-    await this.collection.updateOne({ hash }, { time })
+  completeItem = ({ hash = '', time = new Date().getTime() }) => this.collection.updateOne({ hash }, { $set: {time} })
 
-  completeItems = async ({
-    hashes = [],
+  completeItems = ({
+    hashes = [] as ReadonlyArray<string>,
     time = new Date().getTime(),
-  }: {
-    hashes?: string[]
-    time?: number
-  }): Promise<any> => await Promise.all(hashes.map(hash => this.completeItem({ hash, time })))
+  }) => Promise.all(hashes.map(hash => this.completeItem({ hash, time })))
 }
