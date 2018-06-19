@@ -1,8 +1,8 @@
 # Batcher Module
 
-Responsible for taking claim hashes, and publishing groups of hashes on a timed interval for other modules to do as thye wish with the grouped hashes.
+Responsible for taking claim hashes, and publishing groups of hashes on a timed interval for other modules to do as they wish with the grouped hashes.
 
-In the future this module might apply some rules to the interval method. For example, it might wait until (transaction cost / claim count <= $1) to publish grouped hashes.
+In the future this module might apply some rules to the interval method. For example, it might wait until (transaction cost / claim count <= dollar amount) to publish grouped hashes.
 
 ## Files
 
