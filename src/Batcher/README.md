@@ -23,9 +23,10 @@ The entry point for the module.
 Provides the necessary DB collection functions to store and manipulate file hashes.
 
 #### `src/Batcher/Router.ts`   
-Sort of the saga of the files handles the communication between the different modules.
+Handles the communication between the different modules.
 
-This is where I have sort of deviated from the previous service structure. In the previous service structure, the router would subscribe to events and call methods on controllers. Those controllers would then publish new messages. I have moved all the subscribing/publishing and flow logic into the router to which it behaves more like a 'saga'. I believe this gives more clarity and flexibility.
+In the previous service structure, the router would subscribe to events and call methods on controllers. Those controllers would then publish new messages. In the new system, all the subscribing/publishing and flow logic behaves more like a [saga](https://github.com/redux-saga/redux-saga). This provides more clarity and flexibility.
 
 #### `src/Batcher/Service.ts`
+
 Fires messages based on intervals and provides the ability to stop/start the intervals.
