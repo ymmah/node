@@ -1,6 +1,6 @@
 # Batcher Module
 
-Responsible for taking claim hashes and publishing groups of hashes on a timed interval. Other modules can listen for the published message and do as they wish with the grouped hashes.
+Responsible for taking claim hashes and publishing groups of hashes on a timed interval and marking hashes complete after they have successfully been timmestamped. Other modules can listen for the published message and do as they wish with the grouped hashes.
 
 ## Configuration
 
