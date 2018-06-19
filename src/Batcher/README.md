@@ -19,20 +19,3 @@ This is where I have sort of deviated from the previous service structure. In th
 
 #### `src/Batcher/Service.ts`
 Fires messages based on intervals and provides the ability to stop/start the intervals.
-
-#### `src/BlockchainWriter/Router.ts`
-Changed this file to watch for the `StorageAddFilesToDirectorySuccess` message instead of `onClaimIPFSHash`. Tweaked the handler to also publish a message on success and failure of writing to the blockchain.
-
-#### `src/Configuration.ts`
-Bumped the node version up. This allows us to read only directory timestamps from the block chain and ignore timestamps from previous versions. This simplifies the logic required to sync the nodes because we now simply ignore hashes that were generated in previous versions and were not batched.
-
-Also added a few more configuration items.
-
-#### `src/Messaging/Messages.ts`
-Added more message types. Message types are global at the moment.
-
-#### `src/Storage/ClaimController.ts`
-
-#### `src/Storage/DirectoryCollection.ts`
-Functions for managing the db collection of directory hashes.
-
