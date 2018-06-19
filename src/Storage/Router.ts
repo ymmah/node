@@ -105,7 +105,7 @@ export class Router {
 
   onStorageGetFilesHashesFromNextDirectoryRequest = async (message: any) => {
     const logger = this.logger.child({ method: 'onStorageGetFilesHashesFromNextDirectoryRequest' })
-    logger.trace({ poetTimestamps }, 'Downloading IPFS claim hashes from IPFS Directory hash')
+    logger.trace('Downloading IPFS claim hashes from IPFS Directory hash')
     try {
       const directoryHash = await this.directoryCollection.findItem({ maxAttempts: 20, retryDelay: 20 })
       if (!directoryHash) return
