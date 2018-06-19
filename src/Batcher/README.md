@@ -4,10 +4,22 @@ Responsible for taking claim hashes, and publishing groups of hashes on a timed 
 
 In the future this module might apply some rules to the interval method. For example, it might wait until (transaction cost / claim count <= dollar amount) to publish grouped hashes.
 
+## Configuration
+
+The following configuration properties affect the Batcher Module:
+
+```js
+{
+  "dbUrl": String,
+  "rabbitmqUrl"; String,
+  "batchIntervalInMinutes": Number // How often grouped claim hashes are published
+}
+```
+
 ## Files
 
 #### `src/Batcher/Batcher.ts`   
-The entry point for the service.
+The entry point for the module.
 
 #### `src/Batcher/Database.ts`   
 Provides the necessary DB collection functions.
