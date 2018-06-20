@@ -51,17 +51,17 @@ export class Router {
   onBatcherGetHashesRequest = async (): Promise<void> => {
     const logger = this.logger.child({ method: 'onBatcherGetHashesRequest' })
     try {
+      logger.info('Finding hashes for batching')
       const items = await this.fileHashCollection.getItems()
       const fileHashes = items.map(x => x.hash)
       this.messaging.publish(Exchange.BatcherGetHashesSuccess, { fileHashes })
-      logger.info('Found hashes for batching', { fileHashes })
+      logger.info('Successfully found hashes for batching', { fileHashes })
     } catch (error) {
       this.logger.error(
         {
-          method: 'onBatcherGetHashesRequest',
           error,
         },
-        'Uncaught Exception while getting hashes to be batched'
+        'Failed to find hashes for batching'
       )
       this.messaging.publish(Exchange.BatcherGetHashesFailure, { error })
     }
