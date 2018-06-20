@@ -42,7 +42,7 @@ export class IPFS {
 
   getDirectoryFileHashes = async (hash: string) => {
     const response = await this.ls(hash)
-    return response.Objects[hash].links
+    return response.Objects[hash].Links.map((x: any) => x.Hash)
   }
 
   addFilesToDirectory = async ({
