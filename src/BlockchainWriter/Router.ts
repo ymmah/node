@@ -51,6 +51,7 @@ export class Router {
     try {
       await this.claimController.requestTimestamp(directoryHash)
       this.messaging.publish(Exchange.BlockchainWriterTimestampSuccess, { fileHashes, directoryHash })
+      logger.trace('time stamping success', { fileHashes, directoryHash })
     } catch (exception) {
       logger.error(
         {
