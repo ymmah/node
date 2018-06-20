@@ -1,6 +1,8 @@
 import { inject, injectable } from 'inversify'
 import { Collection, Db } from 'mongodb'
 
+import { minutesToMiliseconds } from 'Helpers/Time'
+
 @injectable()
 export class DirectoryCollection {
   private readonly db: Db
@@ -11,8 +13,8 @@ export class DirectoryCollection {
     this.collection = this.db.collection('storageDirectoryHashes')
   }
 
-  addItems = async (hashes: ReadonlyArray<string>) =>
-    await this.collection.insertMany(
+  addItems = (hashes: ReadonlyArray<string>) =>
+    this.collection.insertMany(
       hashes.map(hash => ({
         hash,
         lastAttemptTime: null,
@@ -22,16 +24,8 @@ export class DirectoryCollection {
       { ordered: false }
     )
 
-  findItem = async ({
-    currentTime = new Date().getTime(),
-    retryDelay,
-    maxAttempts,
-  }: {
-    currentTime?: number
-    retryDelay: number
-    maxAttempts: number
-  }) =>
-    await this.collection.findOne({
+  findItem = ({ currentTime = new Date().getTime(), retryDelay = minutesToMiliseconds(10), maxAttempts = 20 }) =>
+    this.collection.findOne({
       claimId: null,
       ipfsHash: { $exists: true },
       $and: [
@@ -51,16 +45,16 @@ export class DirectoryCollection {
       ],
     })
 
-  setSuccessTime = async ({ hash, time = new Date().getTime() }: { hash: string; time?: number }) =>
-    await this.collection.updateOne(
+  setSuccessTime = ({ hash = '', time = new Date().getTime() }) =>
+    this.collection.updateOne(
       { hash },
       {
         $set: { successTime: time },
       }
     )
 
-  inAttempts = async ({ hash, time = new Date().getTime() }: { hash: string; time?: number }) =>
-    await this.collection.updateOne(
+  incAttempts = ({ hash = '', time = new Date().getTime() }) =>
+    this.collection.updateOne(
       { hash },
       {
         $set: { lastAttemptTime: time },

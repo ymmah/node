@@ -110,7 +110,7 @@ export class Router {
     try {
       const directoryHash = await this.directoryCollection.findItem({ maxAttempts: 20, retryDelay: 20 })
       if (!directoryHash) return
-      await this.directoryCollection.inAttempts({ hash: directoryHash })
+      await this.directoryCollection.incAttempts({ hash: directoryHash })
       const fileHashes = await this.ipfs.getDirectoryFileHashes(directoryHash)
       await this.claimController.download(fileHashes)
       await this.directoryCollection.setSuccessTime({ hash: directoryHash })
