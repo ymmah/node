@@ -79,7 +79,7 @@ export class Storage {
     await collection.createIndex({ ipfsHash: 1 }, { unique: true, name: 'ipfsHash-unique' })
     await collection.createIndex({ attempts: 1 }, { name: 'attempts' })
     await this.dbConnection
-      .collection('storageDirectoryHashes')
+      .collection('storageDirectories')
       .createIndex({ hash: 1 }, { unique: true, name: 'hash-unique' })
   }
 }
