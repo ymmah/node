@@ -64,14 +64,18 @@ export class Router {
   }
 
   onPoetTimestampsDownloaded = async (poetTimestamps: ReadonlyArray<PoetTimestamp>): Promise<void> => {
-    this.logger.trace(
+    const logger = this.logger.child({ method: 'onPoetTimestampsDownloaded' })
+    logger.trace(
       {
-        method: 'onPoetTimestampsDownloaded',
         poetTimestamps,
       },
       'Downloading Claims from IPFS'
     )
-    await this.directoryCollection.addItems(poetTimestamps.map(_ => _.ipfsHash))
+    try {
+      await this.directoryCollection.addItems(poetTimestamps.map(_ => _.ipfsHash))
+    } catch (error) {
+      logger.error({ error, poetTimestamps }, 'Failed to add directory hash to DB collection')
+    }
   }
 
   onBatcherGetHashesSuccess = async (message: any) => {
@@ -84,12 +88,12 @@ export class Router {
     const logger = this.logger.child({ method: 'onStorageAddFilesToDirectoryRequest' })
     const messageContent = message.content.toString()
     const { fileHashes } = JSON.parse(messageContent)
-
+    logger.trace('Adding files hashes to directory', { fileHashes })
     try {
       const emptyDirectoryHash = await this.ipfs.createEmptyDirectory()
       const directoryHash = await this.ipfs.addFilesToDirectory({ directoryHash: emptyDirectoryHash, fileHashes })
       this.messaging.publish(Exchange.StorageAddFilesToDirectorySuccess, { fileHashes, directoryHash })
-      logger.info('Succesfully added file hashes to direcotry', { fileHashes, directoryHash })
+      logger.trace('Succesfully added file hashes to directory', { fileHashes, directoryHash })
     } catch (error) {
       logger.error(
         {
@@ -108,8 +112,9 @@ export class Router {
     const logger = this.logger.child({ method: 'onStorageGetFilesHashesFromNextDirectoryRequest' })
     logger.trace('Downloading IPFS claim hashes from IPFS Directory hash')
     try {
-      const directoryHash = await this.directoryCollection.findItem({ maxAttempts: 20, retryDelay: 20 })
-      if (!directoryHash) return
+      const collectionItem = await this.directoryCollection.findItem()
+      if (!collectionItem) return
+      const { hash: directoryHash } = collectionItem
       await this.directoryCollection.incAttempts({ hash: directoryHash })
       const fileHashes = await this.ipfs.getDirectoryFileHashes(directoryHash)
       await this.claimController.download(fileHashes)
