@@ -81,6 +81,7 @@ export class Router {
   }
 
   onStorageAddFilesToDirectoryRequest = async (message: any) => {
+    const logger = this.logger.child({ method: 'onStorageAddFilesToDirectoryRequest' })
     const messageContent = message.content.toString()
     const { fileHashes } = JSON.parse(messageContent)
 
@@ -88,13 +89,13 @@ export class Router {
       const emptyDirectoryHash = await this.ipfs.createEmptyDirectory()
       const directoryHash = await this.ipfs.addFilesToDirectory({ directoryHash: emptyDirectoryHash, fileHashes })
       this.messaging.publish(Exchange.StorageAddFilesToDirectorySuccess, { fileHashes, directoryHash })
+      logger.info('Succesfully added file hashes to direcotry', { fileHashes, directoryHash })
     } catch (error) {
-      this.logger.error(
+      logger.error(
         {
-          method: 'onStorageAddFilesToDirectoryRequest',
           error,
         },
-        'Uncaught Exception while adding file hashes to a directory Claim'
+        'Failed to add file hashes to a directory'
       )
       this.messaging.publish(Exchange.StorageAddFilesToDirectoryFailure, {
         error,
