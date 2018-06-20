@@ -24,10 +24,9 @@ export class DirectoryCollection {
       { ordered: false }
     )
 
-  findItem = ({ currentTime = new Date().getTime(), retryDelay = minutesToMiliseconds(10), maxAttempts = 20 }) =>
+  findItem = ({ currentTime = new Date().getTime(), retryDelay = minutesToMiliseconds(10), maxAttempts = 20 } = {}) =>
     this.collection.findOne({
-      claimId: null,
-      ipfsHash: { $exists: true },
+      hash: { $exists: true },
       $and: [
         {
           $or: [
