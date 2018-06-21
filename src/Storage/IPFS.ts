@@ -45,14 +45,8 @@ export class IPFS {
     return response.Objects[hash].Links.map((x: any) => x.Hash)
   }
 
-  addFilesToDirectory = ({
-    directoryHash = "",
-    fileHashes = [] as ReadonlyArray<string>,
-  }) =>
-    fileHashes.reduce(
-      async (acc, cur) => await this.addFileToDirectory(await acc, cur),
-      Promise.resolve(directoryHash)
-    )
+  addFilesToDirectory = ({ directoryHash = '', fileHashes = [] as ReadonlyArray<string> }) =>
+    fileHashes.reduce(async (acc, cur) => await this.addFileToDirectory(await acc, cur), Promise.resolve(directoryHash))
 
   cat = async (hash: string): Promise<string> => {
     const response = await fetch(`${this.url}/api/v0/cat?arg=${hash}`, {
