@@ -45,14 +45,11 @@ export class IPFS {
     return response.Objects[hash].Links.map((x: any) => x.Hash)
   }
 
-  addFilesToDirectory = async ({
-    directoryHash,
-    fileHashes = [],
-  }: {
-    directoryHash: string
-    fileHashes: ReadonlyArray<string>
-  }): Promise<string> =>
-    await fileHashes.reduce(
+  addFilesToDirectory = ({
+    directoryHash = "",
+    fileHashes = [] as ReadonlyArray<string>,
+  }) =>
+    fileHashes.reduce(
       async (acc, cur) => await this.addFileToDirectory(await acc, cur),
       Promise.resolve(directoryHash)
     )
