@@ -15,7 +15,7 @@ type init = () => Promise<void>
 
 type addEntries = (entries: ReadonlyArray<{ ipfsHash: string }>) => Promise<any>
 
-type findIncompleteEntry = (
+type findNextEntry = (
   options?: {
     currentTime?: number
     retryDelay?: number
@@ -50,7 +50,7 @@ export class DirectoryCollection {
       { ordered: false }
     )
 
-  findIncompleteEntry: findIncompleteEntry = ({
+  findNextEntry: findNextEntry = ({
     currentTime = new Date().getTime(),
     retryDelay = minutesToMiliseconds(20),
     maxAttempts = 20,

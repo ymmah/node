@@ -112,7 +112,7 @@ export class Router {
     const logger = this.logger.child({ method: 'onStorageGetFilesHashesFromNextDirectoryRequest' })
     logger.trace('Downloading IPFS claim hashes from IPFS Directory hash')
     try {
-      const collectionItem = await this.directoryCollection.findIncompleteEntry()
+      const collectionItem = await this.directoryCollection.findNextEntry()
       if (!collectionItem) return
       const { ipfsHash: directoryHash } = collectionItem
       await this.directoryCollection.incAttempts({ ipfsHash: directoryHash })
