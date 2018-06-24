@@ -1,22 +1,48 @@
 import { inject, injectable } from 'inversify'
-import { Collection, Db } from 'mongodb'
+import { Collection } from 'mongodb'
 
 import { minutesToMiliseconds } from 'Helpers/Time'
 
+export interface Entry {
+  _id?: string
+  attempts?: number
+  ipfsHash: string
+  lastAttemptTime?: number
+  successTime?: string
+}
+
+type init = () => Promise<void>
+
+type addEntries = (entries: ReadonlyArray<{ ipfsHash: string }>) => Promise<any>
+
+type findIncompleteEntry = (
+  options?: {
+    currentTime?: number
+    retryDelay?: number
+    maxAttempts?: number
+  }
+) => Promise<Entry>
+
+type setSuccessTime = (x: { ipfsHash: string; successTime?: number }) => Promise<any>
+
+type incAttempts = (x: { ipfsHash: string; lastAttemptTime?: number }) => Promise<any>
+
 @injectable()
 export class DirectoryCollection {
-  private readonly db: Db
   private readonly collection: Collection
 
-  constructor(@inject('DB') db: Db) {
-    this.db = db
-    this.collection = this.db.collection('storageDirectoryHashes')
+  constructor(@inject('collection') collection: Collection) {
+    this.collection = collection
   }
 
-  addItems = (hashes: ReadonlyArray<string>) =>
+  init: init = async () => {
+    await this.collection.createIndex({ ipfsHash: 1 }, { unique: true })
+  }
+
+  addEntries: addEntries = (entries = []) =>
     this.collection.insertMany(
-      hashes.map(hash => ({
-        hash,
+      entries.map((entry: Entry) => ({
+        ipfsHash: entry.ipfsHash,
         lastAttemptTime: null,
         successTime: null,
         attempts: 0,
@@ -24,9 +50,13 @@ export class DirectoryCollection {
       { ordered: false }
     )
 
-  findItem = ({ currentTime = new Date().getTime(), retryDelay = minutesToMiliseconds(10), maxAttempts = 20 } = {}) =>
+  findIncompleteEntry: findIncompleteEntry = ({
+    currentTime = new Date().getTime(),
+    retryDelay = minutesToMiliseconds(20),
+    maxAttempts = 20,
+  } = {}) =>
     this.collection.findOne({
-      hash: { $exists: true },
+      ipfsHash: { $exists: true },
       $and: [
         {
           $or: [
@@ -44,19 +74,19 @@ export class DirectoryCollection {
       ],
     })
 
-  setSuccessTime = ({ hash = '', time = new Date().getTime() }) =>
+  setSuccessTime: setSuccessTime = ({ ipfsHash, successTime = new Date().getTime() }) =>
     this.collection.updateOne(
-      { hash },
+      { ipfsHash },
       {
-        $set: { successTime: time },
+        $set: { successTime },
       }
     )
 
-  incAttempts = ({ hash = '', time = new Date().getTime() }) =>
+  incAttempts: incAttempts = ({ ipfsHash, lastAttemptTime = new Date().getTime() }) =>
     this.collection.updateOne(
-      { hash },
+      { ipfsHash },
       {
-        $set: { lastAttemptTime: time },
+        $set: { lastAttemptTime },
         $inc: { attempts: 1 },
       }
     )
