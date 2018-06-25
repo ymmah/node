@@ -35,7 +35,7 @@ export class Storage {
     this.logger.info({ configuration: this.configuration }, 'Storage Starting')
     const mongoClient = await MongoClient.connect(this.configuration.dbUrl)
     this.dbConnection = await mongoClient.db()
-    
+
     this.directoryCollection = new DirectoryCollection(this.dbConnection.collection('storageDirectories'))
     await this.directoryCollection.init()
 
