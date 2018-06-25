@@ -115,10 +115,10 @@ export class Router {
       const collectionItem = await this.directoryCollection.findNextEntry()
       if (!collectionItem) return
       const { ipfsHash: directoryHash } = collectionItem
-      await this.directoryCollection.incAttempts({ ipfsHash: directoryHash })
+      await this.directoryCollection.incEntryAttempts({ ipfsHash: directoryHash })
       const fileHashes = await this.ipfs.getDirectoryFileHashes(directoryHash)
       await this.claimController.download(fileHashes)
-      await this.directoryCollection.setSuccessTime({ ipfsHash: directoryHash })
+      await this.directoryCollection.setEntrySuccessTime({ ipfsHash: directoryHash })
       this.messaging.publish(Exchange.StorageGetFilesHashesFromNextDirectorySuccess, { directoryHash, fileHashes })
     } catch (error) {
       logger.error({ error }, 'Error downloading IPFS claim hashes from IPFS Directory hash')

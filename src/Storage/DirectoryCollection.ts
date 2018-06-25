@@ -23,9 +23,9 @@ type findNextEntry = (
   }
 ) => Promise<Entry>
 
-type setSuccessTime = (x: { ipfsHash: string; successTime?: number }) => Promise<any>
+type setEntrySuccessTime = (x: { ipfsHash: string; successTime?: number }) => Promise<any>
 
-type incAttempts = (x: { ipfsHash: string; lastAttemptTime?: number }) => Promise<any>
+type incEntryAttempts = (x: { ipfsHash: string; lastAttemptTime?: number }) => Promise<any>
 
 @injectable()
 export class DirectoryCollection {
@@ -74,7 +74,7 @@ export class DirectoryCollection {
       ],
     })
 
-  setSuccessTime: setSuccessTime = ({ ipfsHash, successTime = new Date().getTime() }) =>
+  setEntrySuccessTime: setEntrySuccessTime = ({ ipfsHash, successTime = new Date().getTime() }) =>
     this.collection.updateOne(
       { ipfsHash },
       {
@@ -82,7 +82,7 @@ export class DirectoryCollection {
       }
     )
 
-  incAttempts: incAttempts = ({ ipfsHash, lastAttemptTime = new Date().getTime() }) =>
+  incEntryAttempts: incEntryAttempts = ({ ipfsHash, lastAttemptTime = new Date().getTime() }) =>
     this.collection.updateOne(
       { ipfsHash },
       {
