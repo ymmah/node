@@ -13,7 +13,7 @@ export interface Entry {
 
 type init = () => Promise<void>
 
-type addEntries = (entries: ReadonlyArray<{ ipfsHash: string }>) => Promise<any>
+type addEntries = (xs: ReadonlyArray<{ ipfsHash: string }>) => Promise<any>
 
 type findNextEntry = (
   options?: {
