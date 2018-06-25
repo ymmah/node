@@ -38,5 +38,9 @@ export class FileCollection {
     this.collection.updateOne({ ipfsHash }, { $set: { successTime } })
 
   setEntrySuccessTimes: setEntrySuccessTimes = (entries = []) =>
-    Promise.all(entries.map(({ ipfsHash, successTime = new Date().getTime() }) => this.setEntrySuccessTime({ ipfsHash, successTime })))
+    Promise.all(
+      entries.map(({ ipfsHash, successTime = new Date().getTime() }) =>
+        this.setEntrySuccessTime({ ipfsHash, successTime })
+      )
+    )
 }
