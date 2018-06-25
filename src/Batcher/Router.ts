@@ -6,18 +6,18 @@ import { childWithFileName } from 'Helpers/Logging'
 import { Exchange } from 'Messaging/Messages'
 import { Messaging } from 'Messaging/Messaging'
 
-import { FileHashCollection } from './FileHashCollection'
+import { FileCollection } from './FileCollection'
 
 @injectable()
 export class Router {
   private readonly logger: Pino.Logger
   private readonly messaging: Messaging
-  private readonly fileHashCollection: FileHashCollection
+  private readonly fileHashCollection: FileCollection
 
   constructor(
     @inject('Logger') logger: Pino.Logger,
     @inject('Messaging') messaging: Messaging,
-    @inject('FileHashCollection') fileHashCollection: FileHashCollection
+    @inject('FileCollection') fileHashCollection: FileCollection
   ) {
     this.logger = childWithFileName(logger, __filename)
     this.messaging = messaging
@@ -36,7 +36,7 @@ export class Router {
     const item = JSON.parse(messageContent)
 
     try {
-      await this.fileHashCollection.addItem({ hash: item.ipfsHash })
+      await this.fileHashCollection.addEntry({ ipfsHash: item.ipfsHash })
     } catch (error) {
       this.logger.error(
         {
@@ -52,8 +52,8 @@ export class Router {
     const logger = this.logger.child({ method: 'onBatcherGetHashesRequest' })
     try {
       logger.trace('Finding hashes for batching')
-      const items = await this.fileHashCollection.getItems()
-      const fileHashes = items.map(x => x.hash)
+      const items = await this.fileHashCollection.findNextEntries()
+      const fileHashes = items.map(x => x.ipfsHash)
       this.messaging.publish(Exchange.BatcherGetHashesSuccess, { fileHashes })
       logger.trace('Successfully found hashes for batching', { fileHashes })
     } catch (error) {
@@ -79,7 +79,7 @@ export class Router {
     const { fileHashes, directoryHash } = JSON.parse(messageContent)
     logger.trace('Marking hashes as complete', { fileHashes, directoryHash })
     try {
-      await this.fileHashCollection.completeItems({ hashes: fileHashes })
+      await this.fileHashCollection.setEntrySuccessTimes(fileHashes.map((ipfsHash: string) => ({ ipfsHash })))
       this.messaging.publish(Exchange.BatcherCompleteHashesSuccess, { fileHashes, directoryHash })
       logger.trace('Successfully mark hashes as complete', { fileHashes, directoryHash })
     } catch (error) {

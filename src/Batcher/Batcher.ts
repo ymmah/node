@@ -6,7 +6,7 @@ import { createModuleLogger } from 'Helpers/Logging'
 import { Messaging } from 'Messaging/Messaging'
 
 import { BatcherConfiguration } from './BatcherConfiguration'
-import { FileHashCollection } from './FileHashCollection'
+import { FileCollection } from './FileCollection'
 import { Router } from './Router'
 import { Service } from './Service'
 import { ServiceConfiguration } from './ServiceConfiguration'
@@ -17,6 +17,7 @@ export class Batcher {
   private readonly configuration: BatcherConfiguration
   private readonly container = new Container()
   private dbConnection: Db
+  private fileCollection: FileCollection
   private router: Router
   private messaging: Messaging
   private service: Service
@@ -30,6 +31,9 @@ export class Batcher {
     this.logger.info({ configuration: this.configuration }, 'Batcher Starting')
     const mongoClient = await MongoClient.connect(this.configuration.dbUrl)
     this.dbConnection = await mongoClient.db()
+
+    this.fileCollection = new FileCollection(this.dbConnection.collection('batcherFiles'))
+    await this.fileCollection.init()
 
     this.messaging = new Messaging(this.configuration.rabbitmqUrl)
     await this.messaging.start()
@@ -48,7 +52,7 @@ export class Batcher {
   initializeContainer() {
     this.container.bind<Pino.Logger>('Logger').toConstantValue(this.logger)
     this.container.bind<Db>('DB').toConstantValue(this.dbConnection)
-    this.container.bind<FileHashCollection>('FileHashCollection').to(FileHashCollection)
+    this.container.bind<FileCollection>('FileCollection').toConstantValue(this.fileCollection)
     this.container.bind<Router>('Router').to(Router)
     this.container.bind<Messaging>('Messaging').toConstantValue(this.messaging)
     this.container.bind<Service>('Service').to(Service)
