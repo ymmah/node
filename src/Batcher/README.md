@@ -20,7 +20,7 @@ The following configuration properties affect the Batcher Module:
 The entry point for the module.
 
 #### `FileCollection.ts`   
-Provides the necessary DB collection functions to store and manipulate file hashes.
+A facade that provides simplified functions to store and manipulate file hashes in the database.
 
 #### `Router.ts`   
 Handles the communication between the different modules.
