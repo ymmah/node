@@ -98,3 +98,5 @@ which is handled in the Router by the `onNewClaim` function.
 
 `onNewClaim` calls the `create` function of the ClaimController, 
 which immediately adds the claim to IPFS and stores it in the database. 
+
+foo
