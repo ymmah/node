@@ -68,7 +68,6 @@ export class Storage {
     this.container.bind<Service>('Service').to(Service)
     this.container.bind<ServiceConfiguration>('ServiceConfiguration').toConstantValue({
       downloadIntervalInSeconds: this.configuration.downloadIntervalInSeconds,
-      getFileHashesFromDirecotryIntervalInSeconds: this.configuration.getFileHashesFromDirecotryIntervalInSeconds,
     })
   }
 
