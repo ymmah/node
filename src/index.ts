@@ -97,7 +97,6 @@ async function main() {
     downloadRetryDelayInMinutes: configuration.downloadRetryDelayInMinutes,
     downloadMaxAttempts: configuration.downloadMaxAttempts,
     downloadTimeoutInSeconds: configuration.downloadTimeoutInSeconds,
-    getFileHashesFromDirecotryIntervalInSeconds: configuration.getFileHashesFromDirecotryIntervalInSeconds,
   })
   try {
     await storage.start()

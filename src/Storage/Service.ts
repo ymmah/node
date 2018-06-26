@@ -12,7 +12,6 @@ export class Service {
   private readonly logger: Pino.Logger
   private readonly claimController: ClaimController
   private readonly downloadNextHashInterval: Interval
-  private readonly getFilesFromNextDirecotryInterval: Interval
 
   constructor(
     @inject('Logger') logger: Pino.Logger,
@@ -26,12 +25,10 @@ export class Service {
 
   async start() {
     this.downloadNextHashInterval.start()
-    this.getFilesFromNextDirecotryInterval.start()
   }
 
   stop() {
     this.downloadNextHashInterval.stop()
-    this.getFilesFromNextDirecotryInterval.start()
   }
 
   private downloadNextHash = async () => {

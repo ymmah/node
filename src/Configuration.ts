@@ -28,8 +28,6 @@ export interface Configuration extends LoggingConfiguration {
   readonly downloadMaxAttempts: number
   readonly downloadTimeoutInSeconds: number
 
-  readonly getFileHashesFromDirecotryIntervalInSeconds: number
-
   readonly batchIntervalInMinutes: number
 }
 
@@ -57,8 +55,6 @@ const defaultConfiguration: Configuration = {
   downloadRetryDelayInMinutes: 10,
   downloadMaxAttempts: 20,
   downloadTimeoutInSeconds: 10,
-
-  getFileHashesFromDirecotryIntervalInSeconds: 5,
 
   loggingLevel: 'info',
   loggingPretty: true,
