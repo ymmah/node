@@ -30,6 +30,7 @@ export class Router {
 
   async start() {
     await this.messaging.consumePoetTimestampsDownloaded(this.onPoetTimestampsDownloaded)
+    await this.messaging.consume(Exchange.BatchReaderReadNextDirectoryRequest, this.onBatchReaderReadNextDirectoryRequest)
   }
 
   onPoetTimestampsDownloaded = async (poetTimestamps: ReadonlyArray<PoetTimestamp>): Promise<void> => {
