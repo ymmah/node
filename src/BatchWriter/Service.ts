@@ -17,7 +17,10 @@ export class Service {
     @inject('Messaging') messaging: Messaging
   ) {
     this.messaging = messaging
-    this.interval = new Interval(this.requestNextBatch, minutesToMiliseconds(configuration.batchIntervalInMinutes))
+    this.interval = new Interval(
+      this.createNextBatch,
+      minutesToMiliseconds(configuration.createNextBatchIntervalInMinutes)
+    )
   }
 
   start() {
@@ -28,7 +31,7 @@ export class Service {
     this.interval.stop()
   }
 
-  private requestNextBatch = async () => {
-    this.messaging.publish(Exchange.BatcherGetHashesRequest, '')
+  private createNextBatch = async () => {
+    this.messaging.publish(Exchange.BatchWriterCreateNextBatchRequest, '')
   }
 }

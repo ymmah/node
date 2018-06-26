@@ -20,34 +20,6 @@ export class IPFS {
     this.downloadTimeoutInSeconds = configuration.downloadTimeoutInSeconds
   }
 
-  createEmptyDirectory = async (): Promise<string> => {
-    const response = await fetch(`${this.url}/api/v0/object/new?arg=unixfs-dir`)
-    const json = await response.json()
-    return json.Hash
-  }
-
-  addFileToDirectory = async (directoryHash: string, fileHash: string): Promise<string> => {
-    const response = await fetch(
-      `${this.url}/api/v0/object/patch/add-link?arg=${directoryHash}&arg=${fileHash}&arg=${fileHash}`
-    )
-    const json = await response.json()
-    return json.Hash
-  }
-
-  ls = async (hash: string): Promise<any> => {
-    const response = await fetch(`${this.url}/api/v0/file/ls?arg=${hash}`)
-    const json = await response.json()
-    return json
-  }
-
-  getDirectoryFileHashes = async (hash: string) => {
-    const response = await this.ls(hash)
-    return response.Objects[hash].Links.map((x: any) => x.Hash)
-  }
-
-  addFilesToDirectory = ({ directoryHash = '', fileHashes = [] as ReadonlyArray<string> }) =>
-    fileHashes.reduce(async (acc, cur) => await this.addFileToDirectory(await acc, cur), Promise.resolve(directoryHash))
-
   cat = async (hash: string): Promise<string> => {
     const response = await fetch(`${this.url}/api/v0/cat?arg=${hash}`, {
       timeout: secondsToMiliseconds(this.downloadTimeoutInSeconds),

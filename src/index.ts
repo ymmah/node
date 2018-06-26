@@ -8,7 +8,8 @@ import 'reflect-metadata'
 import 'Extensions/Promise'
 
 import { API } from 'API/API'
-import { Batcher } from 'Batcher/Batcher'
+import { BatchReader } from 'BatchReader/BatchReader'
+import { BatchWriter } from 'BatchWriter/BatchWriter'
 import { BlockchainReader } from 'BlockchainReader/BlockchainReader'
 import { BlockchainWriter } from 'BlockchainWriter/BlockchainWriter'
 import { loadConfigurationWithDefaults } from 'Configuration'
@@ -50,16 +51,30 @@ async function main() {
     logger.error({ exception }, 'API was unable to start')
   }
 
-  const batcher = new Batcher({
+  const batchWriter = new BatchWriter({
     ...loggingConfiguration,
-    batchIntervalInMinutes: configuration.batchIntervalInMinutes,
+    createNextBatchIntervalInMinutes: configuration.batchIntervalInMinutes,
     dbUrl: configuration.mongodbUrl,
+    ipfsUrl: configuration.ipfsUrl,
     rabbitmqUrl: configuration.rabbitmqUrl,
   })
   try {
-    await batcher.start()
+    await batchWriter.start()
   } catch (exception) {
-    logger.error({ exception }, 'Batcher was unable to start')
+    logger.error({ exception }, 'BatchWriter was unable to start')
+  }
+
+  const batchReader = new BatchReader({
+    ...loggingConfiguration,
+    readNextDirectoryIntervalInSeconds: configuration.batchIntervalInMinutes,
+    dbUrl: configuration.mongodbUrl,
+    ipfsUrl: configuration.ipfsUrl,
+    rabbitmqUrl: configuration.rabbitmqUrl,
+  })
+  try {
+    await batchReader.start()
+  } catch (exception) {
+    logger.error({ exception }, 'BatchReader was unable to start')
   }
 
   const view = new View({

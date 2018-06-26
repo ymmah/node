@@ -3,8 +3,6 @@ import { inject, injectable } from 'inversify'
 import * as Pino from 'pino'
 
 import { childWithFileName } from 'Helpers/Logging'
-import { Exchange } from 'Messaging/Messages'
-import { Messaging } from 'Messaging/Messaging'
 
 import { ClaimController } from './ClaimController'
 import { ServiceConfiguration } from './ServiceConfiguration'
@@ -15,22 +13,15 @@ export class Service {
   private readonly claimController: ClaimController
   private readonly downloadNextHashInterval: Interval
   private readonly getFilesFromNextDirecotryInterval: Interval
-  private readonly messaging: Messaging
 
   constructor(
     @inject('Logger') logger: Pino.Logger,
     @inject('ClaimController') claimController: ClaimController,
-    @inject('ServiceConfiguration') configuration: ServiceConfiguration,
-    @inject('Messaging') messaging: Messaging
+    @inject('ServiceConfiguration') configuration: ServiceConfiguration
   ) {
     this.logger = childWithFileName(logger, __filename)
     this.claimController = claimController
-    this.messaging = messaging
     this.downloadNextHashInterval = new Interval(this.downloadNextHash, 1000 * configuration.downloadIntervalInSeconds)
-    this.getFilesFromNextDirecotryInterval = new Interval(
-      this.getFilesHashesFromNextDirectory,
-      1000 * configuration.getFileHashesFromDirecotryIntervalInSeconds
-    )
   }
 
   async start() {
@@ -55,9 +46,5 @@ export class Service {
         'Uncaught Error Downloading Next Hash'
       )
     }
-  }
-
-  private getFilesHashesFromNextDirectory = async () => {
-    this.messaging.publish(Exchange.StorageGetFilesHashesFromNextDirectoryRequest, '')
   }
 }

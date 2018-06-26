@@ -24,11 +24,11 @@ export class Router {
   }
 
   async start() {
-    await this.messaging.consume(Exchange.StorageAddFilesToDirectorySuccess, this.onStorageAddFilesToDirectorySuccess)
+    await this.messaging.consume(Exchange.BatchWriterCreateNextBatchSuccess, this.onBatchWriterCreateNextBatchSuccess)
     await this.messaging.consume(Exchange.BlockchainWriterTimestampRequest, this.onBlockchainWriterTimestampRequest)
   }
 
-  onStorageAddFilesToDirectorySuccess = async (message: any): Promise<void> => {
+  onBatchWriterCreateNextBatchSuccess = async (message: any): Promise<void> => {
     const messageContent = message.content.toString()
     const { fileHashes, directoryHash } = JSON.parse(messageContent)
     this.messaging.publish(Exchange.BlockchainWriterTimestampRequest, { fileHashes, directoryHash })

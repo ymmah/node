@@ -5,16 +5,18 @@ import * as Pino from 'pino'
 import { createModuleLogger } from 'Helpers/Logging'
 import { Messaging } from 'Messaging/Messaging'
 
-import { BatcherConfiguration } from './BatcherConfiguration'
+import { BatchWriterConfiguration } from './BatchWriterConfiguration'
 import { FileCollection } from './FileCollection'
+import { IPFS } from './IPFS'
+import { IPFSConfiguration } from './IPFSConfiguration'
 import { Router } from './Router'
 import { Service } from './Service'
 import { ServiceConfiguration } from './ServiceConfiguration'
 
 @injectable()
-export class Batcher {
+export class BatchWriter {
   private readonly logger: Pino.Logger
-  private readonly configuration: BatcherConfiguration
+  private readonly configuration: BatchWriterConfiguration
   private readonly container = new Container()
   private dbConnection: Db
   private fileCollection: FileCollection
@@ -22,7 +24,7 @@ export class Batcher {
   private messaging: Messaging
   private service: Service
 
-  constructor(configuration: BatcherConfiguration) {
+  constructor(configuration: BatchWriterConfiguration) {
     this.configuration = configuration
     this.logger = createModuleLogger(configuration, __dirname)
   }
@@ -53,11 +55,15 @@ export class Batcher {
     this.container.bind<Pino.Logger>('Logger').toConstantValue(this.logger)
     this.container.bind<Db>('DB').toConstantValue(this.dbConnection)
     this.container.bind<FileCollection>('FileCollection').toConstantValue(this.fileCollection)
+    this.container.bind<IPFS>('IPFS').to(IPFS)
+    this.container.bind<IPFSConfiguration>('IPFSConfiguration').toConstantValue({
+      ipfsUrl: this.configuration.ipfsUrl,
+    })
     this.container.bind<Router>('Router').to(Router)
     this.container.bind<Messaging>('Messaging').toConstantValue(this.messaging)
     this.container.bind<Service>('Service').to(Service)
     this.container.bind<ServiceConfiguration>('ServiceConfiguration').toConstantValue({
-      batchIntervalInMinutes: this.configuration.batchIntervalInMinutes,
+      createNextBatchIntervalInMinutes: this.configuration.createNextBatchIntervalInMinutes,
     })
   }
 }

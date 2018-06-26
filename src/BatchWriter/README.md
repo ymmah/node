@@ -1,16 +1,19 @@
 # Batcher Module
+Handles the grouping and reading of grouped file hashes.
 
-Responsible for taking claim hashes and publishing groups of hashes on a timed interval and marking hashes complete after they have successfully been timmestamped. Other modules can listen for the published message and do as they wish with the grouped hashes.
+## Responsiblites
+- Watches for messages containg new file hashes and stores them into the database to await being grouped
+- On a set interval, group awaiting file hashes using IPFS directories, then publish a message contain the directory and file hashes
 
 ## Configuration
 
 The following configuration properties affect the Batcher Module:
 
-```js
+```ts
 {
-  "dbUrl": String,
-  "rabbitmqUrl"; String,
-  "batchIntervalInMinutes": Number // How often grouped claim hashes are published
+  "dbUrl": string,
+  "rabbitmqUrl": string,
+  "createNextBatchIntervalInMinutes": number
 }
 ```
 
@@ -20,7 +23,10 @@ The following configuration properties affect the Batcher Module:
 The entry point for the module.
 
 #### `FileCollection.ts`   
-`FileCollections.ts` is a facade, it provides simplified functions to store and manipulate file hashes in the database.
+A facade, to provide simplified manipulation of file hash state in the database.
+
+#### `IPFS.ts`
+Implements an API for the IPFS service.
 
 #### `Router.ts`   
 Handles the communication between the different modules.
