@@ -11,7 +11,7 @@ import { ServiceConfiguration } from './ServiceConfiguration'
 export class Service {
   private readonly logger: Pino.Logger
   private readonly claimController: ClaimController
-  private readonly downloadNextHashInterval: Interval
+  private readonly interval: Interval
 
   constructor(
     @inject('Logger') logger: Pino.Logger,
@@ -20,15 +20,15 @@ export class Service {
   ) {
     this.logger = childWithFileName(logger, __filename)
     this.claimController = claimController
-    this.downloadNextHashInterval = new Interval(this.downloadNextHash, 1000 * configuration.downloadIntervalInSeconds)
+    this.interval = new Interval(this.downloadNextHash, 1000 * configuration.downloadIntervalInSeconds)
   }
 
   async start() {
-    this.downloadNextHashInterval.start()
+    this.interval.start()
   }
 
   stop() {
-    this.downloadNextHashInterval.stop()
+    this.interval.stop()
   }
 
   private downloadNextHash = async () => {
@@ -37,7 +37,7 @@ export class Service {
     } catch (error) {
       this.logger.error(
         {
-          method: 'downloadNextFileHash',
+          method: 'downloadNextHash',
           error,
         },
         'Uncaught Error Downloading Next Hash'
