@@ -31,7 +31,8 @@ export class Router {
   onBatchWriterCreateNextBatchSuccess = async (message: any): Promise<void> => {
     const messageContent = message.content.toString()
     const { fileHashes, directoryHash } = JSON.parse(messageContent)
-    if (fileHashes.length > 0) this.messaging.publish(Exchange.BlockchainWriterTimestampRequest, { fileHashes, directoryHash });
+    if (fileHashes.length > 0)
+      this.messaging.publish(Exchange.BlockchainWriterTimestampRequest, { fileHashes, directoryHash })
   }
 
   onBlockchainWriterTimestampRequest = async (message: any): Promise<void> => {
