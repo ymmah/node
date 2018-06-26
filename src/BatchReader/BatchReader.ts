@@ -34,7 +34,7 @@ export class BatchReader {
     const mongoClient = await MongoClient.connect(this.configuration.dbUrl)
     this.dbConnection = await mongoClient.db()
 
-    this.directoryCollection = new DirectoryCollection(this.dbConnection.collection('BatchReaderDirectories'))
+    this.directoryCollection = new DirectoryCollection(this.dbConnection.collection('batchReader'))
     await this.directoryCollection.init()
 
     this.messaging = new Messaging(this.configuration.rabbitmqUrl)

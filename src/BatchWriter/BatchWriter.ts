@@ -34,7 +34,7 @@ export class BatchWriter {
     const mongoClient = await MongoClient.connect(this.configuration.dbUrl)
     this.dbConnection = await mongoClient.db()
 
-    this.fileCollection = new FileCollection(this.dbConnection.collection('batcherFiles'))
+    this.fileCollection = new FileCollection(this.dbConnection.collection('batchWriter'))
     await this.fileCollection.init()
 
     this.messaging = new Messaging(this.configuration.rabbitmqUrl)
