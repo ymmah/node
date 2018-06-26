@@ -1,5 +1,5 @@
 # Batcher Module
-Handles the grouping and reading of grouped file hashes.
+Groups IPFS file hashes into IPFS directories 
 
 ## Responsiblites
 - Watches for messages containg new file hashes and stores them into the database to await being grouped

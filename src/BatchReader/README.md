@@ -1,5 +1,5 @@
 # BatchReader Module
-Reads IPFS directories and publishes the contained file hashes.
+Reads IPFS files from IPFS directories.
 
 ## Responsiblites
 - Watches for messages from the BlockchainReader that contain directory hashes and stores the hashes to be read.
