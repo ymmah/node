@@ -42,12 +42,12 @@ export class Router {
       {
         poetTimestamps,
       },
-      'Downloading Claims from IPFS'
+      'Storing directory hashes from timestamps'
     )
     try {
       await this.directoryCollection.addEntries(poetTimestamps)
     } catch (error) {
-      logger.error({ error, poetTimestamps }, 'Failed to add directory hash to DB collection')
+      logger.error({ error, poetTimestamps }, 'Failed to store directory hashs to DB collection')
     }
   }
 
