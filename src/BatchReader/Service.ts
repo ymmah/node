@@ -1,7 +1,7 @@
 import { Interval } from '@po.et/poet-js'
 import { inject, injectable } from 'inversify'
 
-import { minutesToMiliseconds } from 'Helpers/Time'
+import { secondsToMiliseconds } from 'Helpers/Time'
 import { Exchange } from 'Messaging/Messages'
 import { Messaging } from 'Messaging/Messaging'
 
@@ -19,7 +19,7 @@ export class Service {
     this.messaging = messaging
     this.interval = new Interval(
       this.readNextDirectory,
-      minutesToMiliseconds(configuration.readNextDirectoryIntervalInSeconds)
+      secondsToMiliseconds(configuration.readNextDirectoryIntervalInSeconds)
     )
   }
 

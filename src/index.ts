@@ -53,7 +53,7 @@ async function main() {
 
   const batchWriter = new BatchWriter({
     ...loggingConfiguration,
-    createNextBatchIntervalInMinutes: configuration.batchIntervalInMinutes,
+    createNextBatchIntervalInSeconds: configuration.batchIntervalInSeconds,
     dbUrl: configuration.mongodbUrl,
     ipfsUrl: configuration.ipfsUrl,
     rabbitmqUrl: configuration.rabbitmqUrl,
@@ -66,7 +66,7 @@ async function main() {
 
   const batchReader = new BatchReader({
     ...loggingConfiguration,
-    readNextDirectoryIntervalInSeconds: configuration.batchIntervalInMinutes,
+    readNextDirectoryIntervalInSeconds: configuration.readDirectoryIntervalInSeconds,
     dbUrl: configuration.mongodbUrl,
     ipfsUrl: configuration.ipfsUrl,
     rabbitmqUrl: configuration.rabbitmqUrl,

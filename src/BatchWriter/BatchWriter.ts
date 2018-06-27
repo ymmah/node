@@ -63,7 +63,7 @@ export class BatchWriter {
     this.container.bind<Messaging>('Messaging').toConstantValue(this.messaging)
     this.container.bind<Service>('Service').to(Service)
     this.container.bind<ServiceConfiguration>('ServiceConfiguration').toConstantValue({
-      createNextBatchIntervalInMinutes: this.configuration.createNextBatchIntervalInMinutes,
+      createNextBatchIntervalInSeconds: this.configuration.createNextBatchIntervalInSeconds,
     })
   }
 }
