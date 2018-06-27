@@ -2,7 +2,7 @@
 Groups IPFS file hashes into IPFS directories 
 
 ## Responsiblites
-- Watches for messages containg new file hashes and stores them into the database to await being grouped
+- Watches for messages containing new file hashes and stores them into the database to await being grouped
 - On a set interval, group awaiting file hashes using IPFS directories, then publish a message contain the directory and file hashes
 
 ## Configuration
