@@ -47,7 +47,7 @@ export class Router {
     try {
       await this.directoryCollection.addEntries(poetTimestamps)
     } catch (error) {
-      logger.error({ error, poetTimestamps }, 'Failed to store directory hashs to DB collection')
+      logger.error({ error, poetTimestamps }, 'Failed to store directory hashes to DB collection')
     }
   }
 
