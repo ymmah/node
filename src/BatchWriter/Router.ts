@@ -56,9 +56,9 @@ export class Router {
     logger.trace('Creat next batch request')
     try {
       const { fileHashes, directoryHash } = await this.createNextBatch()
-      logger.trace('Create next batch success', { fileHashes, directoryHash })
+      logger.trace({ fileHashes, directoryHash }, 'Create next batch success')
     } catch (error) {
-      logger.error('Create next batch failure', { error })
+      logger.error({ error }, 'Create next batch failure')
     }
   }
 
@@ -84,7 +84,7 @@ export class Router {
     try {
       await this.messaging.publish(Exchange.BatchWriterCompleteHashesRequest, { fileHashes, directoryHash })
     } catch (error) {
-      logger.error('Failed to publish BatchWriterCompleteHashesRequest')
+      logger.error({ fileHashes, directoryHash }, 'Failed to publish BatchWriterCompleteHashesRequest')
     }
   }
 
@@ -92,13 +92,13 @@ export class Router {
     const logger = this.logger.child({ method: 'onBatchWriterCompleteHashesRequest' })
     const messageContent = message.content.toString()
     const { fileHashes, directoryHash } = JSON.parse(messageContent)
-    logger.trace('Mark hashes complete reqeust', { fileHashes, directoryHash })
+    logger.trace({ fileHashes, directoryHash }, 'Mark hashes complete reqeust')
     try {
       await this.completeHashes({ fileHashes, directoryHash })
       await this.fileHashCollection.setEntrySuccessTimes(fileHashes.map((ipfsHash: string) => ({ ipfsHash })))
-      logger.trace('Mark hashes complete success', { fileHashes, directoryHash })
+      logger.trace({ fileHashes, directoryHash }, 'Mark hashes complete success')
     } catch (error) {
-      logger.error('Mark hashes complete failure', { error, fileHashes, directoryHash })
+      logger.error({ error, fileHashes, directoryHash }, 'Mark hashes complete failure')
     }
   }
 

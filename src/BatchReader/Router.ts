@@ -56,9 +56,9 @@ export class Router {
     logger.trace('Read next directory request')
     try {
       const { fileHashes, directoryHash } = await this.readNextDirectory()
-      logger.trace('Read next directory success', { directoryHash, fileHashes })
+      logger.trace({ directoryHash, fileHashes }, 'Read next directory success')
     } catch (error) {
-      logger.error('Read next directory failure', { error })
+      logger.error({ error }, 'Read next directory failure')
     }
   }
 

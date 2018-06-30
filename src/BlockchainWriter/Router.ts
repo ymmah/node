@@ -36,7 +36,7 @@ export class Router {
       if (fileHashes.length > 0)
         await this.messaging.publish(Exchange.BlockchainWriterTimestampRequest, { fileHashes, directoryHash })
     } catch (error) {
-      logger.error('Failed to publish BlockchainWriterTimestampRequest')
+      logger.error({ fileHashes, directoryHash }, 'Failed to publish BlockchainWriterTimestampRequest')
     }
   }
 
@@ -46,20 +46,26 @@ export class Router {
     const messageContent = message.content.toString()
     const { fileHashes, directoryHash } = JSON.parse(messageContent)
 
-    logger.trace('Timestamp request', {
-      fileHashes,
-      directoryHash,
-    })
+    logger.trace(
+      {
+        fileHashes,
+        directoryHash,
+      },
+      'Timestamp request'
+    )
 
     try {
       await this.createTimestampRequest({ fileHashes, directoryHash })
-      logger.trace('Timestamp request success', { fileHashes, directoryHash })
+      logger.trace({ fileHashes, directoryHash }, 'Timestamp request success')
     } catch (error) {
-      logger.error('Timestamp request failure', {
-        error,
-        directoryHash,
-        fileHashes,
-      })
+      logger.error(
+        {
+          error,
+          directoryHash,
+          fileHashes,
+        },
+        'Timestamp request failure'
+      )
     }
   }
   createTimestampRequest = async ({
