@@ -17,13 +17,13 @@ export class ClaimController {
   addEntries = (entries: ReadonlyArray<{ ipfsDirectoryHash: string }>): Promise<InsertWriteOpResult> =>
     this.directoryDAO.addEntries(entries)
 
-  readNextDirectory = async (): Promise<{ ipfsDirectoryHash: string; fileHashes: ReadonlyArray<string> }> => {
+  readNextDirectory = async (): Promise<{ ipfsDirectoryHash: string; ipfsFileHashes: ReadonlyArray<string> }> => {
     const collectionItem = await this.directoryDAO.findNextEntry()
     if (!collectionItem) return
     const { ipfsDirectoryHash } = collectionItem
     await this.directoryDAO.incEntryAttempts({ ipfsDirectoryHash })
-    const fileHashes = await this.ipfs.getDirectoryFileHashes(ipfsDirectoryHash)
+    const ipfsFileHashes = await this.ipfs.getDirectoryFileHashes(ipfsDirectoryHash)
     await this.directoryDAO.setEntrySuccessTime({ ipfsDirectoryHash })
-    return { ipfsDirectoryHash, fileHashes }
+    return { ipfsDirectoryHash, ipfsFileHashes }
   }
 }

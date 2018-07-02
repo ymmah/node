@@ -56,12 +56,12 @@ export class Router {
     const logger = this.logger.child({ method: 'onPoetTimestampsDownloaded' })
 
     const messageContent = message.content.toString()
-    const { fileHashes } = JSON.parse(messageContent)
+    const { ipfsFileHashes } = JSON.parse(messageContent)
 
-    logger.trace({ fileHashes }, 'Downloading Claims from IPFS')
+    logger.trace({ ipfsFileHashes }, 'Downloading Claims from IPFS')
 
     try {
-      await this.claimController.download(fileHashes)
+      await this.claimController.download(ipfsFileHashes)
     } catch (error) {
       logger.error({ error }, 'Error downloading IPFS hashes')
     }
