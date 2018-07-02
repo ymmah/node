@@ -22,8 +22,8 @@ The following configuration properties affect the Batcher Module:
 #### `Batcher.ts`   
 The entry point for the module.
 
-#### `FileCollection.ts`   
-A facade, to provide simplified manipulation of file hash state in the database.
+#### `FileDAO.ts`   
+A facade, data access object, to provide simplified manipulation of file hash state in the database.
 
 #### `IPFS.ts`
 Implements an API for the IPFS service.
