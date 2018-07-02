@@ -1,3 +1,3 @@
 export interface ServiceConfiguration {
-  readonly createNextBatchIntervalInSeconds: number
+  readonly batchCreationIntervalInSeconds: number
 }

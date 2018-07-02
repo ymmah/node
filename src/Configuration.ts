@@ -28,7 +28,7 @@ export interface Configuration extends LoggingConfiguration {
   readonly downloadMaxAttempts: number
   readonly downloadTimeoutInSeconds: number
 
-  readonly batchIntervalInSeconds: number
+  readonly batchCreationIntervalInSeconds: number
 
   readonly readDirectoryIntervalInSeconds: number
 }
@@ -61,7 +61,7 @@ const defaultConfiguration: Configuration = {
   loggingLevel: 'info',
   loggingPretty: true,
 
-  batchIntervalInSeconds: 600,
+  batchCreationIntervalInSeconds: 600,
 
   readDirectoryIntervalInSeconds: 30,
 }

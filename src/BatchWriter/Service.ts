@@ -19,7 +19,7 @@ export class Service {
     this.messaging = messaging
     this.interval = new Interval(
       this.createNextBatch,
-      secondsToMiliseconds(configuration.createNextBatchIntervalInSeconds)
+      secondsToMiliseconds(configuration.batchCreationIntervalInSeconds)
     )
   }
 

@@ -53,7 +53,7 @@ async function main() {
 
   const batchWriter = new BatchWriter({
     ...loggingConfiguration,
-    createNextBatchIntervalInSeconds: configuration.batchIntervalInSeconds,
+    batchCreationIntervalInSeconds: configuration.batchCreationIntervalInSeconds,
     dbUrl: configuration.mongodbUrl,
     ipfsUrl: configuration.ipfsUrl,
     rabbitmqUrl: configuration.rabbitmqUrl,
