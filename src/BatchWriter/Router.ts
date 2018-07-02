@@ -47,7 +47,7 @@ export class Router {
     }
   }
 
-  onBatchWriterCreateNextBatchRequest = async (message: any) => {
+  onBatchWriterCreateNextBatchRequest = async () => {
     const logger = this.logger.child({ method: 'onBatchWriterCreateNextBatchRequest' })
     logger.info('Create next batch request')
     try {
