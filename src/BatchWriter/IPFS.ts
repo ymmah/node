@@ -5,7 +5,7 @@ import { IPFSConfiguration } from './IPFSConfiguration'
 
 type addFileToDirectory = (directoryhash: string, filehash: string) => Promise<string>
 
-type addFilesToDirectory = (x: { ipfsDirectoryHash: string; fileHashes: ReadonlyArray<string> }) => Promise<string>
+type addFilesToDirectory = (x: { ipfsDirectoryHash: string; ipfsFileHashes: ReadonlyArray<string> }) => Promise<string>
 
 type createEmptyDirectory = () => Promise<string>
 
@@ -25,8 +25,8 @@ export class IPFS {
     return json.Hash
   }
 
-  addFilesToDirectory: addFilesToDirectory = ({ ipfsDirectoryHash = '', fileHashes = [] }) =>
-    fileHashes.reduce(
+  addFilesToDirectory: addFilesToDirectory = ({ ipfsDirectoryHash = '', ipfsFileHashes = [] }) =>
+    ipfsFileHashes.reduce(
       async (acc, cur) => await this.addFileToDirectory(await acc, cur),
       Promise.resolve(ipfsDirectoryHash)
     )

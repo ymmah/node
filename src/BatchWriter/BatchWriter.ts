@@ -6,6 +6,7 @@ import { createModuleLogger } from 'Helpers/Logging'
 import { Messaging } from 'Messaging/Messaging'
 
 import { BatchWriterConfiguration } from './BatchWriterConfiguration'
+import { ClaimController } from './ClaimController'
 import { FileDAO } from './FileDAO'
 import { IPFS } from './IPFS'
 import { IPFSConfiguration } from './IPFSConfiguration'
@@ -49,6 +50,7 @@ export class BatchWriter {
 
   initializeContainer() {
     this.container.bind<Pino.Logger>('Logger').toConstantValue(this.logger)
+    this.container.bind<ClaimController>('ClaimController').to(ClaimController)
     this.container.bind<Db>('DB').toConstantValue(this.dbConnection)
     this.container.bind<FileDAO>('FileDAO').to(FileDAO)
     this.container.bind<Collection>('fileCollection').toConstantValue(this.dbConnection.collection('batchWriter'))

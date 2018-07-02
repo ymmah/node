@@ -1,21 +1,21 @@
 import { inject, injectable } from 'inversify'
-import { Collection } from 'mongodb'
+import { Collection, InsertOneWriteOpResult, UpdateWriteOpResult } from 'mongodb'
 
 export interface Entry {
   _id?: string
-  ipfsHash: string
+  ipfsFileHash: string
   successTime?: number
 }
 
 type init = () => Promise<void>
 
-type addEntry = (x: Entry) => Promise<any>
+type addEntry = (x: Entry) => Promise<InsertOneWriteOpResult>
 
 type findNextEntries = () => Promise<ReadonlyArray<Entry>>
 
-type setEntrySuccessTime = (x: Entry) => Promise<any>
+type setEntrySuccessTime = (x: Entry) => Promise<UpdateWriteOpResult>
 
-type setEntrySuccessTimes = (xs: ReadonlyArray<Entry>) => Promise<any>
+type setEntrySuccessTimes = (xs: ReadonlyArray<Entry>) => Promise<ReadonlyArray<UpdateWriteOpResult>>
 
 @injectable()
 export class FileDAO {
@@ -26,21 +26,21 @@ export class FileDAO {
   }
 
   init: init = async () => {
-    await this.fileCollection.createIndex({ ipfsHash: 1 }, { unique: true })
+    await this.fileCollection.createIndex({ ipfsFileHash: 1 }, { unique: true })
   }
 
-  addEntry: addEntry = ({ ipfsHash = '' }) => this.fileCollection.insertOne({ ipfsHash, successTime: null })
+  addEntry: addEntry = ({ ipfsFileHash }) => this.fileCollection.insertOne({ ipfsFileHash, successTime: null })
 
   findNextEntries: findNextEntries = () =>
-    this.fileCollection.find({ successTime: null }, { fields: { _id: false, ipfsHash: true } }).toArray()
+    this.fileCollection.find({ successTime: null }, { fields: { _id: false, ipfsFileHash: true } }).toArray()
 
-  setEntrySuccessTime: setEntrySuccessTime = ({ ipfsHash = '', successTime = new Date().getTime() }) =>
-    this.fileCollection.updateOne({ ipfsHash }, { $set: { successTime } })
+  setEntrySuccessTime: setEntrySuccessTime = ({ ipfsFileHash = '', successTime = new Date().getTime() }) =>
+    this.fileCollection.updateOne({ ipfsFileHash }, { $set: { successTime } })
 
   setEntrySuccessTimes: setEntrySuccessTimes = (entries = []) =>
     Promise.all(
-      entries.map(({ ipfsHash, successTime = new Date().getTime() }) =>
-        this.setEntrySuccessTime({ ipfsHash, successTime })
+      entries.map(({ ipfsFileHash, successTime = new Date().getTime() }) =>
+        this.setEntrySuccessTime({ ipfsFileHash, successTime })
       )
     )
 }

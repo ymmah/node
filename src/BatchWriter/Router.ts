@@ -5,26 +5,22 @@ import { childWithFileName } from 'Helpers/Logging'
 import { Exchange } from 'Messaging/Messages'
 import { Messaging } from 'Messaging/Messaging'
 
-import { FileDAO } from './FileDAO'
-import { IPFS } from './IPFS'
+import { ClaimController } from './ClaimController'
 
 @injectable()
 export class Router {
   private readonly logger: Pino.Logger
   private readonly messaging: Messaging
-  private readonly fileDAO: FileDAO
-  private readonly ipfs: IPFS
+  private readonly claimController: ClaimController
 
   constructor(
     @inject('Logger') logger: Pino.Logger,
     @inject('Messaging') messaging: Messaging,
-    @inject('FileDAO') fileDAO: FileDAO,
-    @inject('IPFS') ipfs: IPFS
+    @inject('ClaimController') claimController: ClaimController
   ) {
     this.logger = childWithFileName(logger, __filename)
     this.messaging = messaging
-    this.fileDAO = fileDAO
-    this.ipfs = ipfs
+    this.claimController = claimController
   }
 
   async start() {
@@ -35,15 +31,15 @@ export class Router {
   }
 
   onClaimIPFSHash = async (message: any): Promise<void> => {
+    const logger = this.logger.child({ method: 'onClaimIPFSHash' })
     const messageContent = message.content.toString()
     const item = JSON.parse(messageContent)
 
     try {
-      await this.fileDAO.addEntry({ ipfsHash: item.ipfsHash })
+      await this.claimController.addEntry({ ipfsFileHash: item.ipfsHash })
     } catch (error) {
-      this.logger.error(
+      logger.error(
         {
-          method: 'onClaimIPFSHash',
           error,
         },
         'Uncaught Exception while adding item to be batched'
@@ -55,68 +51,36 @@ export class Router {
     const logger = this.logger.child({ method: 'onBatchWriterCreateNextBatchRequest' })
     logger.info('Create next batch request')
     try {
-      const { fileHashes, ipfsDirectoryHash } = await this.createNextBatch()
-      logger.trace({ fileHashes, ipfsDirectoryHash }, 'Create next batch success')
+      const { ipfsFileHashes, ipfsDirectoryHash } = await this.claimController.createNextBatch()
+      await this.messaging.publish(Exchange.BatchWriterCreateNextBatchSuccess, { ipfsFileHashes, ipfsDirectoryHash })
+      logger.info({ ipfsFileHashes, ipfsDirectoryHash }, 'Create next batch success')
     } catch (error) {
       logger.error({ error }, 'Create next batch failure')
-    }
-  }
-
-  createNextBatch = async (): Promise<{ fileHashes: ReadonlyArray<string>; ipfsDirectoryHash: string }> => {
-    try {
-      const items = await this.fileDAO.findNextEntries()
-      const fileHashes = items.map(x => x.ipfsHash)
-      const emptyDirectoryHash = await this.ipfs.createEmptyDirectory()
-      const ipfsDirectoryHash = await this.ipfs.addFilesToDirectory({
-        ipfsDirectoryHash: emptyDirectoryHash,
-        fileHashes,
-      })
-      await this.messaging.publish(Exchange.BatchWriterCreateNextBatchSuccess, { fileHashes, ipfsDirectoryHash })
-      return { fileHashes, ipfsDirectoryHash }
-    } catch (error) {
-      await this.messaging.publish(Exchange.BatchWriterCreateNextBatchFailure, {
-        error,
-      })
     }
   }
 
   onBlockchainWriterTimestampSuccess = async (message: any): Promise<void> => {
     const logger = this.logger.child({ method: 'onBatchWriterCompleteHashesRequest' })
     const messageContent = message.content.toString()
-    const { fileHashes, ipfsDirectoryHash } = JSON.parse(messageContent)
+    const { fileHashes: ipfsFileHashes, ipfsDirectoryHash } = JSON.parse(messageContent)
     try {
-      await this.messaging.publish(Exchange.BatchWriterCompleteHashesRequest, { fileHashes, ipfsDirectoryHash })
+      await this.messaging.publish(Exchange.BatchWriterCompleteHashesRequest, { ipfsFileHashes, ipfsDirectoryHash })
     } catch (error) {
-      logger.error({ fileHashes, ipfsDirectoryHash }, 'Failed to publish BatchWriterCompleteHashesRequest')
+      logger.error({ ipfsFileHashes, ipfsDirectoryHash }, 'Failed to publish BatchWriterCompleteHashesRequest')
     }
   }
 
   onBatchWriterCompleteHashesRequest = async (message: any): Promise<void> => {
     const logger = this.logger.child({ method: 'onBatchWriterCompleteHashesRequest' })
     const messageContent = message.content.toString()
-    const { fileHashes, ipfsDirectoryHash } = JSON.parse(messageContent)
-    logger.trace({ fileHashes, ipfsDirectoryHash }, 'Mark hashes complete reqeust')
+    const { ipfsFileHashes, ipfsDirectoryHash } = JSON.parse(messageContent)
+    logger.info({ ipfsFileHashes, ipfsDirectoryHash }, 'Mark hashes complete reqeust')
     try {
-      await this.completeHashes({ fileHashes, ipfsDirectoryHash })
-      await this.fileDAO.setEntrySuccessTimes(fileHashes.map((ipfsHash: string) => ({ ipfsHash })))
-      logger.trace({ fileHashes, ipfsDirectoryHash }, 'Mark hashes complete success')
+      await this.claimController.completeHashes(ipfsFileHashes)
+      await this.messaging.publish(Exchange.BatchWriterCompleteHashesSuccess, { ipfsFileHashes, ipfsDirectoryHash })
+      logger.info({ ipfsFileHashes, ipfsDirectoryHash }, 'Mark hashes complete success')
     } catch (error) {
-      logger.error({ error, fileHashes, ipfsDirectoryHash }, 'Mark hashes complete failure')
-    }
-  }
-
-  completeHashes = async ({
-    fileHashes,
-    ipfsDirectoryHash,
-  }: {
-    fileHashes: ReadonlyArray<string>
-    ipfsDirectoryHash: string
-  }): Promise<void> => {
-    try {
-      await this.fileDAO.setEntrySuccessTimes(fileHashes.map((ipfsHash: string) => ({ ipfsHash })))
-      await this.messaging.publish(Exchange.BatchWriterCompleteHashesSuccess, { fileHashes, ipfsDirectoryHash })
-    } catch (error) {
-      await this.messaging.publish(Exchange.BatchWriterCompleteHashesFailure, { error, fileHashes, ipfsDirectoryHash })
+      logger.error({ error, ipfsFileHashes, ipfsDirectoryHash }, 'Mark hashes complete failure')
     }
   }
 }
