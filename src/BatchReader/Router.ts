@@ -44,7 +44,7 @@ export class Router {
       },
       'Storing directory hashes from timestamps'
     )
-    
+
     try {
       const entries = poetTimestamps.map(x => ({ ipfsDirectoryHash: x.ipfsHash }))
       await this.directoryCollection.addEntries(entries)
