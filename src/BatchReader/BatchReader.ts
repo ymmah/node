@@ -1,12 +1,12 @@
 import { Container } from 'inversify'
-import { Db, MongoClient } from 'mongodb'
+import { Db, MongoClient, Collection } from 'mongodb'
 import * as Pino from 'pino'
 
 import { createModuleLogger } from 'Helpers/Logging'
 import { Messaging } from 'Messaging/Messaging'
 
 import { BatchReaderConfiguration } from './BatchReaderConfiguration'
-import { DirectoryCollection } from './DirectoryCollection'
+import { DirectoryDAO } from './DirectoryDAO'
 import { IPFS } from './IPFS'
 import { IPFSConfiguration } from './IPFSConfiguration'
 import { Router } from './Router'
@@ -18,7 +18,6 @@ export class BatchReader {
   private readonly configuration: BatchReaderConfiguration
   private readonly container = new Container()
   private dbConnection: Db
-  private directoryCollection: DirectoryCollection
   private router: Router
   private messaging: Messaging
   private service: Service
@@ -32,9 +31,6 @@ export class BatchReader {
     this.logger.info({ configuration: this.configuration }, 'BatchReader Starting')
     const mongoClient = await MongoClient.connect(this.configuration.dbUrl)
     this.dbConnection = await mongoClient.db()
-
-    this.directoryCollection = new DirectoryCollection(this.dbConnection.collection('batchReader'))
-    await this.directoryCollection.start()
 
     this.messaging = new Messaging(this.configuration.rabbitmqUrl)
     await this.messaging.start()
@@ -53,7 +49,8 @@ export class BatchReader {
   initializeContainer() {
     this.container.bind<Pino.Logger>('Logger').toConstantValue(this.logger)
     this.container.bind<Db>('DB').toConstantValue(this.dbConnection)
-    this.container.bind<DirectoryCollection>('DirectoryCollection').toConstantValue(this.directoryCollection)
+    this.container.bind<DirectoryDAO>('DirectoryDAO').to(DirectoryDAO)
+    this.container.bind<Collection>('directoryCollection').toConstantValue(this.dbConnection.collection('batchReader'))
     this.container.bind<IPFS>('IPFS').to(IPFS)
     this.container.bind<IPFSConfiguration>('IPFSConfiguration').toConstantValue({
       ipfsUrl: this.configuration.ipfsUrl,

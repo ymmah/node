@@ -29,7 +29,7 @@ type setEntrySuccessTime = (x: Entry) => Promise<any>
 type incEntryAttempts = (x: Entry) => Promise<any>
 
 @injectable()
-export class DirectoryCollection {
+export class DirectoryDAO {
   private readonly collection: Collection
 
   constructor(@inject('collection') collection: Collection) {

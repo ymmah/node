@@ -22,8 +22,8 @@ The following configuration properties affect the BatchReader Module:
 #### `BatchReader.ts`   
 The entry point for the module.
 
-#### `DirectoryCollection.ts`   
-A facade, to provide simplified manipulation of directory hash state in the database.
+#### `DirectoryDAO.ts`   
+A facade, data access object, to provide simplified manipulation of directory hash state in the database.
 
 #### `IPFS.ts`
 Implements an API for the IPFS service.

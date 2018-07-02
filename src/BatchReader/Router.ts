@@ -6,25 +6,25 @@ import { childWithFileName } from 'Helpers/Logging'
 import { Exchange } from 'Messaging/Messages'
 import { Messaging } from 'Messaging/Messaging'
 
-import { DirectoryCollection } from './DirectoryCollection'
+import { DirectoryDAO } from './DirectoryDAO'
 import { IPFS } from './IPFS'
 
 @injectable()
 export class Router {
   private readonly logger: Pino.Logger
   private readonly messaging: Messaging
-  private readonly directoryCollection: DirectoryCollection
+  private readonly directoryDAO: DirectoryDAO
   private readonly ipfs: IPFS
 
   constructor(
     @inject('Logger') logger: Pino.Logger,
     @inject('Messaging') messaging: Messaging,
-    @inject('DirectoryCollection') directoryCollection: DirectoryCollection,
+    @inject('DirectoryDAO') directoryDAO: DirectoryDAO,
     @inject('IPFS') ipfs: IPFS
   ) {
     this.logger = childWithFileName(logger, __filename)
     this.messaging = messaging
-    this.directoryCollection = directoryCollection
+    this.directoryDAO = directoryDAO
     this.ipfs = ipfs
   }
 
@@ -47,7 +47,7 @@ export class Router {
 
     try {
       const entries = poetTimestamps.map(x => ({ ipfsDirectoryHash: x.ipfsHash }))
-      await this.directoryCollection.addEntries(entries)
+      await this.directoryDAO.addEntries(entries)
     } catch (error) {
       logger.error({ error, poetTimestamps }, 'Failed to store directory hashes to DB collection')
     }
@@ -66,12 +66,12 @@ export class Router {
 
   readNextDirectory = async (): Promise<{ ipfsDirectoryHash: string; fileHashes: ReadonlyArray<string> }> => {
     try {
-      const collectionItem = await this.directoryCollection.findNextEntry()
+      const collectionItem = await this.directoryDAO.findNextEntry()
       if (!collectionItem) return
       const { ipfsDirectoryHash } = collectionItem
-      await this.directoryCollection.incEntryAttempts({ ipfsDirectoryHash })
+      await this.directoryDAO.incEntryAttempts({ ipfsDirectoryHash })
       const fileHashes = await this.ipfs.getDirectoryFileHashes(ipfsDirectoryHash)
-      await this.directoryCollection.setEntrySuccessTime({ ipfsDirectoryHash })
+      await this.directoryDAO.setEntrySuccessTime({ ipfsDirectoryHash })
       await this.messaging.publish(Exchange.BatchReaderReadNextDirectorySuccess, { ipfsDirectoryHash, fileHashes })
       return { ipfsDirectoryHash, fileHashes }
     } catch (error) {
