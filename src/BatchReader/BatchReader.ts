@@ -6,6 +6,7 @@ import { createModuleLogger } from 'Helpers/Logging'
 import { Messaging } from 'Messaging/Messaging'
 
 import { BatchReaderConfiguration } from './BatchReaderConfiguration'
+import { ClaimController } from './ClaimController'
 import { DirectoryDAO } from './DirectoryDAO'
 import { IPFS } from './IPFS'
 import { IPFSConfiguration } from './IPFSConfiguration'
@@ -48,6 +49,7 @@ export class BatchReader {
 
   initializeContainer() {
     this.container.bind<Pino.Logger>('Logger').toConstantValue(this.logger)
+    this.container.bind<ClaimController>('ClaimController').to(ClaimController)
     this.container.bind<Collection>('directoryCollection').toConstantValue(this.dbConnection.collection('batchReader'))
     this.container.bind<Db>('DB').toConstantValue(this.dbConnection)
     this.container.bind<DirectoryDAO>('DirectoryDAO').to(DirectoryDAO)

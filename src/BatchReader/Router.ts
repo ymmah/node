@@ -6,26 +6,22 @@ import { childWithFileName } from 'Helpers/Logging'
 import { Exchange } from 'Messaging/Messages'
 import { Messaging } from 'Messaging/Messaging'
 
-import { DirectoryDAO } from './DirectoryDAO'
-import { IPFS } from './IPFS'
+import { ClaimController } from './ClaimController'
 
 @injectable()
 export class Router {
   private readonly logger: Pino.Logger
   private readonly messaging: Messaging
-  private readonly directoryDAO: DirectoryDAO
-  private readonly ipfs: IPFS
+  private readonly claimController: ClaimController
 
   constructor(
     @inject('Logger') logger: Pino.Logger,
     @inject('Messaging') messaging: Messaging,
-    @inject('DirectoryDAO') directoryDAO: DirectoryDAO,
-    @inject('IPFS') ipfs: IPFS
+    @inject('ClaimController') claimController: ClaimController
   ) {
     this.logger = childWithFileName(logger, __filename)
     this.messaging = messaging
-    this.directoryDAO = directoryDAO
-    this.ipfs = ipfs
+    this.claimController = claimController
   }
 
   async start() {
@@ -47,7 +43,7 @@ export class Router {
 
     try {
       const entries = poetTimestamps.map(x => ({ ipfsDirectoryHash: x.ipfsHash }))
-      await this.directoryDAO.addEntries(entries)
+      await this.claimController.addEntries(entries)
     } catch (error) {
       logger.error({ error, poetTimestamps }, 'Failed to store directory hashes to DB collection')
     }
@@ -57,25 +53,11 @@ export class Router {
     const logger = this.logger.child({ method: 'onBatchReaderReadNextDirectoryRequest' })
     logger.trace('Read next directory request')
     try {
-      const { fileHashes, ipfsDirectoryHash } = await this.readNextDirectory()
-      logger.trace({ ipfsDirectoryHash, fileHashes }, 'Read next directory success')
+      const { fileHashes, ipfsDirectoryHash } = await this.claimController.readNextDirectory()
+      await this.messaging.publish(Exchange.BatchReaderReadNextDirectorySuccess, { ipfsDirectoryHash, fileHashes })
+      logger.info({ ipfsDirectoryHash, fileHashes }, 'Read next directory success')
     } catch (error) {
       logger.error({ error }, 'Read next directory failure')
-    }
-  }
-
-  readNextDirectory = async (): Promise<{ ipfsDirectoryHash: string; fileHashes: ReadonlyArray<string> }> => {
-    try {
-      const collectionItem = await this.directoryDAO.findNextEntry()
-      if (!collectionItem) return
-      const { ipfsDirectoryHash } = collectionItem
-      await this.directoryDAO.incEntryAttempts({ ipfsDirectoryHash })
-      const fileHashes = await this.ipfs.getDirectoryFileHashes(ipfsDirectoryHash)
-      await this.directoryDAO.setEntrySuccessTime({ ipfsDirectoryHash })
-      await this.messaging.publish(Exchange.BatchReaderReadNextDirectorySuccess, { ipfsDirectoryHash, fileHashes })
-      return { ipfsDirectoryHash, fileHashes }
-    } catch (error) {
-      await this.messaging.publish(Exchange.BatchReaderReadNextDirectoryFailure, { error })
     }
   }
 }
