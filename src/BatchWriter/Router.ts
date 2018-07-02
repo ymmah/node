@@ -5,25 +5,25 @@ import { childWithFileName } from 'Helpers/Logging'
 import { Exchange } from 'Messaging/Messages'
 import { Messaging } from 'Messaging/Messaging'
 
-import { FileCollection } from './FileCollection'
+import { FileDAO } from './FileDAO'
 import { IPFS } from './IPFS'
 
 @injectable()
 export class Router {
   private readonly logger: Pino.Logger
   private readonly messaging: Messaging
-  private readonly fileHashCollection: FileCollection
+  private readonly fileDAO: FileDAO
   private readonly ipfs: IPFS
 
   constructor(
     @inject('Logger') logger: Pino.Logger,
     @inject('Messaging') messaging: Messaging,
-    @inject('FileCollection') fileHashCollection: FileCollection,
+    @inject('FileDAO') fileDAO: FileDAO,
     @inject('IPFS') ipfs: IPFS
   ) {
     this.logger = childWithFileName(logger, __filename)
     this.messaging = messaging
-    this.fileHashCollection = fileHashCollection
+    this.fileDAO = fileDAO
     this.ipfs = ipfs
   }
 
@@ -39,7 +39,7 @@ export class Router {
     const item = JSON.parse(messageContent)
 
     try {
-      await this.fileHashCollection.addEntry({ ipfsHash: item.ipfsHash })
+      await this.fileDAO.addEntry({ ipfsHash: item.ipfsHash })
     } catch (error) {
       this.logger.error(
         {
@@ -53,7 +53,7 @@ export class Router {
 
   onBatchWriterCreateNextBatchRequest = async (message: any) => {
     const logger = this.logger.child({ method: 'onBatchWriterCreateNextBatchRequest' })
-    logger.trace('Creat next batch request')
+    logger.info('Create next batch request')
     try {
       const { fileHashes, ipfsDirectoryHash } = await this.createNextBatch()
       logger.trace({ fileHashes, ipfsDirectoryHash }, 'Create next batch success')
@@ -64,7 +64,7 @@ export class Router {
 
   createNextBatch = async (): Promise<{ fileHashes: ReadonlyArray<string>; ipfsDirectoryHash: string }> => {
     try {
-      const items = await this.fileHashCollection.findNextEntries()
+      const items = await this.fileDAO.findNextEntries()
       const fileHashes = items.map(x => x.ipfsHash)
       const emptyDirectoryHash = await this.ipfs.createEmptyDirectory()
       const ipfsDirectoryHash = await this.ipfs.addFilesToDirectory({
@@ -98,7 +98,7 @@ export class Router {
     logger.trace({ fileHashes, ipfsDirectoryHash }, 'Mark hashes complete reqeust')
     try {
       await this.completeHashes({ fileHashes, ipfsDirectoryHash })
-      await this.fileHashCollection.setEntrySuccessTimes(fileHashes.map((ipfsHash: string) => ({ ipfsHash })))
+      await this.fileDAO.setEntrySuccessTimes(fileHashes.map((ipfsHash: string) => ({ ipfsHash })))
       logger.trace({ fileHashes, ipfsDirectoryHash }, 'Mark hashes complete success')
     } catch (error) {
       logger.error({ error, fileHashes, ipfsDirectoryHash }, 'Mark hashes complete failure')
@@ -113,7 +113,7 @@ export class Router {
     ipfsDirectoryHash: string
   }): Promise<void> => {
     try {
-      await this.fileHashCollection.setEntrySuccessTimes(fileHashes.map((ipfsHash: string) => ({ ipfsHash })))
+      await this.fileDAO.setEntrySuccessTimes(fileHashes.map((ipfsHash: string) => ({ ipfsHash })))
       await this.messaging.publish(Exchange.BatchWriterCompleteHashesSuccess, { fileHashes, ipfsDirectoryHash })
     } catch (error) {
       await this.messaging.publish(Exchange.BatchWriterCompleteHashesFailure, { error, fileHashes, ipfsDirectoryHash })

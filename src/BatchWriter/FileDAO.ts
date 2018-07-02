@@ -18,24 +18,24 @@ type setEntrySuccessTime = (x: Entry) => Promise<any>
 type setEntrySuccessTimes = (xs: ReadonlyArray<Entry>) => Promise<any>
 
 @injectable()
-export class FileCollection {
-  private readonly collection: Collection
+export class FileDAO {
+  private readonly fileCollection: Collection
 
-  constructor(@inject('collection') collection: Collection) {
-    this.collection = collection
+  constructor(@inject('fileCollection') fileCollection: Collection) {
+    this.fileCollection = fileCollection
   }
 
   init: init = async () => {
-    await this.collection.createIndex({ ipfsHash: 1 }, { unique: true })
+    await this.fileCollection.createIndex({ ipfsHash: 1 }, { unique: true })
   }
 
-  addEntry: addEntry = ({ ipfsHash = '' }) => this.collection.insertOne({ ipfsHash, successTime: null })
+  addEntry: addEntry = ({ ipfsHash = '' }) => this.fileCollection.insertOne({ ipfsHash, successTime: null })
 
   findNextEntries: findNextEntries = () =>
-    this.collection.find({ successTime: null }, { fields: { _id: false, ipfsHash: true } }).toArray()
+    this.fileCollection.find({ successTime: null }, { fields: { _id: false, ipfsHash: true } }).toArray()
 
   setEntrySuccessTime: setEntrySuccessTime = ({ ipfsHash = '', successTime = new Date().getTime() }) =>
-    this.collection.updateOne({ ipfsHash }, { $set: { successTime } })
+    this.fileCollection.updateOne({ ipfsHash }, { $set: { successTime } })
 
   setEntrySuccessTimes: setEntrySuccessTimes = (entries = []) =>
     Promise.all(

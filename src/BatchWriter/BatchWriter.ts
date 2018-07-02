@@ -1,12 +1,12 @@
 import { injectable, Container } from 'inversify'
-import { Db, MongoClient } from 'mongodb'
+import { Db, MongoClient, Collection } from 'mongodb'
 import * as Pino from 'pino'
 
 import { createModuleLogger } from 'Helpers/Logging'
 import { Messaging } from 'Messaging/Messaging'
 
 import { BatchWriterConfiguration } from './BatchWriterConfiguration'
-import { FileCollection } from './FileCollection'
+import { FileDAO } from './FileDAO'
 import { IPFS } from './IPFS'
 import { IPFSConfiguration } from './IPFSConfiguration'
 import { Router } from './Router'
@@ -19,7 +19,6 @@ export class BatchWriter {
   private readonly configuration: BatchWriterConfiguration
   private readonly container = new Container()
   private dbConnection: Db
-  private fileCollection: FileCollection
   private router: Router
   private messaging: Messaging
   private service: Service
@@ -30,12 +29,9 @@ export class BatchWriter {
   }
 
   async start() {
-    this.logger.info({ configuration: this.configuration }, 'Batcher Starting')
+    this.logger.info({ configuration: this.configuration }, 'BatchWriter Starting')
     const mongoClient = await MongoClient.connect(this.configuration.dbUrl)
     this.dbConnection = await mongoClient.db()
-
-    this.fileCollection = new FileCollection(this.dbConnection.collection('batchWriter'))
-    await this.fileCollection.init()
 
     this.messaging = new Messaging(this.configuration.rabbitmqUrl)
     await this.messaging.start()
@@ -54,7 +50,8 @@ export class BatchWriter {
   initializeContainer() {
     this.container.bind<Pino.Logger>('Logger').toConstantValue(this.logger)
     this.container.bind<Db>('DB').toConstantValue(this.dbConnection)
-    this.container.bind<FileCollection>('FileCollection').toConstantValue(this.fileCollection)
+    this.container.bind<FileDAO>('FileDAO').to(FileDAO)
+    this.container.bind<Collection>('fileCollection').toConstantValue(this.dbConnection.collection('batchWriter'))
     this.container.bind<IPFS>('IPFS').to(IPFS)
     this.container.bind<IPFSConfiguration>('IPFSConfiguration').toConstantValue({
       ipfsUrl: this.configuration.ipfsUrl,
