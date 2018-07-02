@@ -14,7 +14,7 @@ export interface Entry {
 
 type start = () => Promise<void>
 
-type addEntries = (xs: ReadonlyArray<{ ipfsDirectoryHash: string }>) => Promise<InsertWriteOpResult>
+type addEntries = (xs: ReadonlyArray<Entry>) => Promise<InsertWriteOpResult>
 
 type findNextEntry = (
   options?: {
@@ -24,9 +24,9 @@ type findNextEntry = (
   }
 ) => Promise<Entry>
 
-type setEntrySuccessTime = (x: { ipfsDirectoryHash: string; successTime?: number }) => Promise<any>
+type setEntrySuccessTime = (x: Entry) => Promise<any>
 
-type incEntryAttempts = (x: { ipfsDirectoryHash: string; lastAttemptTime?: number }) => Promise<any>
+type incEntryAttempts = (x: Entry) => Promise<any>
 
 @injectable()
 export class DirectoryCollection {

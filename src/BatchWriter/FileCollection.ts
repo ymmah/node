@@ -4,18 +4,18 @@ import { Collection } from 'mongodb'
 export interface Entry {
   _id?: string
   ipfsHash: string
-  successTime?: string
+  successTime?: number
 }
 
 type init = () => Promise<void>
 
-type addEntry = (x: { ipfsHash: string }) => Promise<any>
+type addEntry = (x: Entry) => Promise<any>
 
 type findNextEntries = () => Promise<ReadonlyArray<Entry>>
 
-type setEntrySuccessTime = (x: { ipfsHash: string; successTime?: number }) => Promise<any>
+type setEntrySuccessTime = (x: Entry) => Promise<any>
 
-type setEntrySuccessTimes = (xs: ReadonlyArray<{ ipfsHash: string; successTime?: number }>) => Promise<any>
+type setEntrySuccessTimes = (xs: ReadonlyArray<Entry>) => Promise<any>
 
 @injectable()
 export class FileCollection {
