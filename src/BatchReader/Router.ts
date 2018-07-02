@@ -44,8 +44,10 @@ export class Router {
       },
       'Storing directory hashes from timestamps'
     )
+    
     try {
-      await this.directoryCollection.addEntries(poetTimestamps)
+      const entries = poetTimestamps.map(x => ({ ipfsDirectoryHash: x.ipfsHash }))
+      await this.directoryCollection.addEntries(entries)
     } catch (error) {
       logger.error({ error, poetTimestamps }, 'Failed to store directory hashes to DB collection')
     }
@@ -66,10 +68,10 @@ export class Router {
     try {
       const collectionItem = await this.directoryCollection.findNextEntry()
       if (!collectionItem) return
-      const { ipfsHash: ipfsDirectoryHash } = collectionItem
-      await this.directoryCollection.incEntryAttempts({ ipfsHash: ipfsDirectoryHash })
+      const { ipfsDirectoryHash } = collectionItem
+      await this.directoryCollection.incEntryAttempts({ ipfsDirectoryHash })
       const fileHashes = await this.ipfs.getDirectoryFileHashes(ipfsDirectoryHash)
-      await this.directoryCollection.setEntrySuccessTime({ ipfsHash: ipfsDirectoryHash })
+      await this.directoryCollection.setEntrySuccessTime({ ipfsDirectoryHash })
       await this.messaging.publish(Exchange.BatchReaderReadNextDirectorySuccess, { ipfsDirectoryHash, fileHashes })
       return { ipfsDirectoryHash, fileHashes }
     } catch (error) {

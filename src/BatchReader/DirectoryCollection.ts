@@ -7,14 +7,14 @@ import { minutesToMiliseconds } from 'Helpers/Time'
 export interface Entry {
   _id?: string
   attempts?: number
-  ipfsHash: string
+  ipfsDirectoryHash: string
   lastAttemptTime?: number
   successTime?: string
 }
 
 type start = () => Promise<void>
 
-type addEntries = (xs: ReadonlyArray<{ ipfsHash: string }>) => Promise<InsertWriteOpResult>
+type addEntries = (xs: ReadonlyArray<{ ipfsDirectoryHash: string }>) => Promise<InsertWriteOpResult>
 
 type findNextEntry = (
   options?: {
@@ -24,9 +24,9 @@ type findNextEntry = (
   }
 ) => Promise<Entry>
 
-type setEntrySuccessTime = (x: { ipfsHash: string; successTime?: number }) => Promise<any>
+type setEntrySuccessTime = (x: { ipfsDirectoryHash: string; successTime?: number }) => Promise<any>
 
-type incEntryAttempts = (x: { ipfsHash: string; lastAttemptTime?: number }) => Promise<any>
+type incEntryAttempts = (x: { ipfsDirectoryHash: string; lastAttemptTime?: number }) => Promise<any>
 
 @injectable()
 export class DirectoryCollection {
@@ -37,14 +37,14 @@ export class DirectoryCollection {
   }
 
   readonly start: start = async () => {
-    await this.collection.createIndex({ ipfsHash: 1 }, { unique: true })
+    await this.collection.createIndex({ ipfsDirectoryHash: 1 }, { unique: true })
   }
 
   readonly addEntries: addEntries = async (entries = []) =>
     this.collection
       .insertMany(
         entries.map((entry: Entry) => ({
-          ipfsHash: entry.ipfsHash,
+          ipfsDirectoryHash: entry.ipfsDirectoryHash,
           lastAttemptTime: null,
           successTime: null,
           attempts: 0,
@@ -59,7 +59,7 @@ export class DirectoryCollection {
     maxAttempts = 20,
   } = {}) =>
     this.collection.findOne({
-      ipfsHash: { $exists: true },
+      ipfsDirectoryHash: { $exists: true },
       $and: [
         {
           $or: [
@@ -77,17 +77,17 @@ export class DirectoryCollection {
       ],
     })
 
-  readonly setEntrySuccessTime: setEntrySuccessTime = ({ ipfsHash, successTime = new Date().getTime() }) =>
+  readonly setEntrySuccessTime: setEntrySuccessTime = ({ ipfsDirectoryHash, successTime = new Date().getTime() }) =>
     this.collection.updateOne(
-      { ipfsHash },
+      { ipfsDirectoryHash },
       {
         $set: { successTime },
       }
     )
 
-  readonly incEntryAttempts: incEntryAttempts = ({ ipfsHash, lastAttemptTime = new Date().getTime() }) =>
+  readonly incEntryAttempts: incEntryAttempts = ({ ipfsDirectoryHash, lastAttemptTime = new Date().getTime() }) =>
     this.collection.updateOne(
-      { ipfsHash },
+      { ipfsDirectoryHash },
       {
         $set: { lastAttemptTime },
         $inc: { attempts: 1 },
