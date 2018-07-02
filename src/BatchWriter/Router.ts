@@ -55,21 +55,24 @@ export class Router {
     const logger = this.logger.child({ method: 'onBatchWriterCreateNextBatchRequest' })
     logger.trace('Creat next batch request')
     try {
-      const { fileHashes, directoryHash } = await this.createNextBatch()
-      logger.trace({ fileHashes, directoryHash }, 'Create next batch success')
+      const { fileHashes, ipfsDirectoryHash } = await this.createNextBatch()
+      logger.trace({ fileHashes, ipfsDirectoryHash }, 'Create next batch success')
     } catch (error) {
       logger.error({ error }, 'Create next batch failure')
     }
   }
 
-  createNextBatch = async (): Promise<{ fileHashes: ReadonlyArray<string>; directoryHash: string }> => {
+  createNextBatch = async (): Promise<{ fileHashes: ReadonlyArray<string>; ipfsDirectoryHash: string }> => {
     try {
       const items = await this.fileHashCollection.findNextEntries()
       const fileHashes = items.map(x => x.ipfsHash)
       const emptyDirectoryHash = await this.ipfs.createEmptyDirectory()
-      const directoryHash = await this.ipfs.addFilesToDirectory({ directoryHash: emptyDirectoryHash, fileHashes })
-      await this.messaging.publish(Exchange.BatchWriterCreateNextBatchSuccess, { fileHashes, directoryHash })
-      return { fileHashes, directoryHash }
+      const ipfsDirectoryHash = await this.ipfs.addFilesToDirectory({
+        ipfsDirectoryHash: emptyDirectoryHash,
+        fileHashes,
+      })
+      await this.messaging.publish(Exchange.BatchWriterCreateNextBatchSuccess, { fileHashes, ipfsDirectoryHash })
+      return { fileHashes, ipfsDirectoryHash }
     } catch (error) {
       await this.messaging.publish(Exchange.BatchWriterCreateNextBatchFailure, {
         error,
@@ -80,40 +83,40 @@ export class Router {
   onBlockchainWriterTimestampSuccess = async (message: any): Promise<void> => {
     const logger = this.logger.child({ method: 'onBatchWriterCompleteHashesRequest' })
     const messageContent = message.content.toString()
-    const { fileHashes, directoryHash } = JSON.parse(messageContent)
+    const { fileHashes, ipfsDirectoryHash } = JSON.parse(messageContent)
     try {
-      await this.messaging.publish(Exchange.BatchWriterCompleteHashesRequest, { fileHashes, directoryHash })
+      await this.messaging.publish(Exchange.BatchWriterCompleteHashesRequest, { fileHashes, ipfsDirectoryHash })
     } catch (error) {
-      logger.error({ fileHashes, directoryHash }, 'Failed to publish BatchWriterCompleteHashesRequest')
+      logger.error({ fileHashes, ipfsDirectoryHash }, 'Failed to publish BatchWriterCompleteHashesRequest')
     }
   }
 
   onBatchWriterCompleteHashesRequest = async (message: any): Promise<void> => {
     const logger = this.logger.child({ method: 'onBatchWriterCompleteHashesRequest' })
     const messageContent = message.content.toString()
-    const { fileHashes, directoryHash } = JSON.parse(messageContent)
-    logger.trace({ fileHashes, directoryHash }, 'Mark hashes complete reqeust')
+    const { fileHashes, ipfsDirectoryHash } = JSON.parse(messageContent)
+    logger.trace({ fileHashes, ipfsDirectoryHash }, 'Mark hashes complete reqeust')
     try {
-      await this.completeHashes({ fileHashes, directoryHash })
+      await this.completeHashes({ fileHashes, ipfsDirectoryHash })
       await this.fileHashCollection.setEntrySuccessTimes(fileHashes.map((ipfsHash: string) => ({ ipfsHash })))
-      logger.trace({ fileHashes, directoryHash }, 'Mark hashes complete success')
+      logger.trace({ fileHashes, ipfsDirectoryHash }, 'Mark hashes complete success')
     } catch (error) {
-      logger.error({ error, fileHashes, directoryHash }, 'Mark hashes complete failure')
+      logger.error({ error, fileHashes, ipfsDirectoryHash }, 'Mark hashes complete failure')
     }
   }
 
   completeHashes = async ({
     fileHashes,
-    directoryHash,
+    ipfsDirectoryHash,
   }: {
     fileHashes: ReadonlyArray<string>
-    directoryHash: string
+    ipfsDirectoryHash: string
   }): Promise<void> => {
     try {
       await this.fileHashCollection.setEntrySuccessTimes(fileHashes.map((ipfsHash: string) => ({ ipfsHash })))
-      await this.messaging.publish(Exchange.BatchWriterCompleteHashesSuccess, { fileHashes, directoryHash })
+      await this.messaging.publish(Exchange.BatchWriterCompleteHashesSuccess, { fileHashes, ipfsDirectoryHash })
     } catch (error) {
-      await this.messaging.publish(Exchange.BatchWriterCompleteHashesFailure, { error, fileHashes, directoryHash })
+      await this.messaging.publish(Exchange.BatchWriterCompleteHashesFailure, { error, fileHashes, ipfsDirectoryHash })
     }
   }
 }

@@ -55,23 +55,23 @@ export class Router {
     const logger = this.logger.child({ method: 'onBatchReaderReadNextDirectoryRequest' })
     logger.trace('Read next directory request')
     try {
-      const { fileHashes, directoryHash } = await this.readNextDirectory()
-      logger.trace({ directoryHash, fileHashes }, 'Read next directory success')
+      const { fileHashes, ipfsDirectoryHash } = await this.readNextDirectory()
+      logger.trace({ ipfsDirectoryHash, fileHashes }, 'Read next directory success')
     } catch (error) {
       logger.error({ error }, 'Read next directory failure')
     }
   }
 
-  readNextDirectory = async (): Promise<{ directoryHash: string; fileHashes: ReadonlyArray<string> }> => {
+  readNextDirectory = async (): Promise<{ ipfsDirectoryHash: string; fileHashes: ReadonlyArray<string> }> => {
     try {
       const collectionItem = await this.directoryCollection.findNextEntry()
       if (!collectionItem) return
-      const { ipfsHash: directoryHash } = collectionItem
-      await this.directoryCollection.incEntryAttempts({ ipfsHash: directoryHash })
-      const fileHashes = await this.ipfs.getDirectoryFileHashes(directoryHash)
-      await this.directoryCollection.setEntrySuccessTime({ ipfsHash: directoryHash })
-      await this.messaging.publish(Exchange.BatchReaderReadNextDirectorySuccess, { directoryHash, fileHashes })
-      return { directoryHash, fileHashes }
+      const { ipfsHash: ipfsDirectoryHash } = collectionItem
+      await this.directoryCollection.incEntryAttempts({ ipfsHash: ipfsDirectoryHash })
+      const fileHashes = await this.ipfs.getDirectoryFileHashes(ipfsDirectoryHash)
+      await this.directoryCollection.setEntrySuccessTime({ ipfsHash: ipfsDirectoryHash })
+      await this.messaging.publish(Exchange.BatchReaderReadNextDirectorySuccess, { ipfsDirectoryHash, fileHashes })
+      return { ipfsDirectoryHash, fileHashes }
     } catch (error) {
       await this.messaging.publish(Exchange.BatchReaderReadNextDirectoryFailure, { error })
     }
