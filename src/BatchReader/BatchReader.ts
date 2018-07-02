@@ -48,9 +48,9 @@ export class BatchReader {
 
   initializeContainer() {
     this.container.bind<Pino.Logger>('Logger').toConstantValue(this.logger)
+    this.container.bind<Collection>('directoryCollection').toConstantValue(this.dbConnection.collection('batchReader'))
     this.container.bind<Db>('DB').toConstantValue(this.dbConnection)
     this.container.bind<DirectoryDAO>('DirectoryDAO').to(DirectoryDAO)
-    this.container.bind<Collection>('directoryCollection').toConstantValue(this.dbConnection.collection('batchReader'))
     this.container.bind<IPFS>('IPFS').to(IPFS)
     this.container.bind<IPFSConfiguration>('IPFSConfiguration').toConstantValue({
       ipfsUrl: this.configuration.ipfsUrl,
