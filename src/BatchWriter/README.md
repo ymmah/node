@@ -13,7 +13,7 @@ The following configuration properties affect the Batcher Module:
 {
   "dbUrl": string,
   "rabbitmqUrl": string,
-  "createNextBatchIntervalInSeconds": number
+  "batchCreationIntervalInSeconds": number
 }
 ```
 
