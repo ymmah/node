@@ -51,17 +51,19 @@ async function main() {
     logger.error({ exception }, 'API was unable to start')
   }
 
-  const batchWriter = new BatchWriter({
-    ...loggingConfiguration,
-    batchCreationIntervalInSeconds: configuration.batchCreationIntervalInSeconds,
-    dbUrl: configuration.mongodbUrl,
-    ipfsUrl: configuration.ipfsUrl,
-    rabbitmqUrl: configuration.rabbitmqUrl,
-  })
-  try {
-    await batchWriter.start()
-  } catch (exception) {
-    logger.error({ exception }, 'BatchWriter was unable to start')
+  if (configuration.enableTimestamping) {
+    const batchWriter = new BatchWriter({
+      ...loggingConfiguration,
+      batchCreationIntervalInSeconds: configuration.batchCreationIntervalInSeconds,
+      dbUrl: configuration.mongodbUrl,
+      ipfsUrl: configuration.ipfsUrl,
+      rabbitmqUrl: configuration.rabbitmqUrl,
+    })
+    try {
+      await batchWriter.start()
+    } catch (exception) {
+      logger.error({ exception }, 'BatchWriter was unable to start')
+    }
   }
 
   const batchReader = new BatchReader({
