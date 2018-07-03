@@ -62,7 +62,7 @@ export class Router {
   onBlockchainWriterTimestampSuccess = async (message: any): Promise<void> => {
     const logger = this.logger.child({ method: 'onBatchWriterCompleteHashesRequest' })
     const messageContent = message.content.toString()
-    const { fileHashes: ipfsFileHashes, ipfsDirectoryHash } = JSON.parse(messageContent)
+    const { ipfsFileHashes, ipfsDirectoryHash } = JSON.parse(messageContent)
     try {
       await this.messaging.publish(Exchange.BatchWriterCompleteHashesRequest, { ipfsFileHashes, ipfsDirectoryHash })
     } catch (error) {
@@ -78,7 +78,7 @@ export class Router {
     try {
       await this.claimController.completeHashes(ipfsFileHashes)
       await this.messaging.publish(Exchange.BatchWriterCompleteHashesSuccess, { ipfsFileHashes, ipfsDirectoryHash })
-      logger.trace({ ipfsFileHashes, ipfsDirectoryHash }, 'Mark hashes complete success')
+      logger.info({ ipfsFileHashes, ipfsDirectoryHash }, 'Mark hashes complete success')
     } catch (error) {
       logger.error({ error, ipfsFileHashes, ipfsDirectoryHash }, 'Mark hashes complete failure')
     }
