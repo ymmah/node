@@ -49,7 +49,7 @@ export class Router {
 
   onBatchWriterCreateNextBatchRequest = async () => {
     const logger = this.logger.child({ method: 'onBatchWriterCreateNextBatchRequest' })
-    logger.info('Create next batch request')
+    logger.trace('Create next batch request')
     try {
       const { ipfsFileHashes, ipfsDirectoryHash } = await this.claimController.createNextBatch()
       await this.messaging.publish(Exchange.BatchWriterCreateNextBatchSuccess, { ipfsFileHashes, ipfsDirectoryHash })
@@ -74,11 +74,11 @@ export class Router {
     const logger = this.logger.child({ method: 'onBatchWriterCompleteHashesRequest' })
     const messageContent = message.content.toString()
     const { ipfsFileHashes, ipfsDirectoryHash } = JSON.parse(messageContent)
-    logger.info({ ipfsFileHashes, ipfsDirectoryHash }, 'Mark hashes complete reqeust')
+    logger.trace({ ipfsFileHashes, ipfsDirectoryHash }, 'Mark hashes complete reqeust')
     try {
       await this.claimController.completeHashes(ipfsFileHashes)
       await this.messaging.publish(Exchange.BatchWriterCompleteHashesSuccess, { ipfsFileHashes, ipfsDirectoryHash })
-      logger.info({ ipfsFileHashes, ipfsDirectoryHash }, 'Mark hashes complete success')
+      logger.trace({ ipfsFileHashes, ipfsDirectoryHash }, 'Mark hashes complete success')
     } catch (error) {
       logger.error({ error, ipfsFileHashes, ipfsDirectoryHash }, 'Mark hashes complete failure')
     }
