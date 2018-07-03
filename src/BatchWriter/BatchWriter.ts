@@ -45,7 +45,7 @@ export class BatchWriter {
     this.service = this.container.get('Service')
     await this.service.start()
 
-    this.logger.info('Batcher Started')
+    this.logger.info('Batcher Writer Started')
   }
 
   initializeContainer() {
