@@ -79,7 +79,11 @@ export class Router {
       await this.claimController.requestTimestamp(ipfsDirectoryHash)
       await this.messaging.publish(Exchange.BlockchainWriterTimestampSuccess, { ipfsFileHashes, ipfsDirectoryHash })
     } catch (error) {
-      await this.messaging.publish(Exchange.BlockchainWriterTimestampFailure, { error, ipfsFileHashes, ipfsDirectoryHash })
+      await this.messaging.publish(Exchange.BlockchainWriterTimestampFailure, {
+        error,
+        ipfsFileHashes,
+        ipfsDirectoryHash,
+      })
     }
   }
 }
