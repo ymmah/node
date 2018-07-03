@@ -30,18 +30,18 @@ type incEntryAttempts = (x: Entry) => Promise<any>
 
 @injectable()
 export class DirectoryDAO {
-  private readonly collection: Collection
+  private readonly directoryCollection: Collection
 
-  constructor(@inject('collection') collection: Collection) {
-    this.collection = collection
+  constructor(@inject('directoryCollection') directoryCollection: Collection) {
+    this.directoryCollection = directoryCollection
   }
 
   readonly start: start = async () => {
-    await this.collection.createIndex({ ipfsDirectoryHash: 1 }, { unique: true })
+    await this.directoryCollection.createIndex({ ipfsDirectoryHash: 1 }, { unique: true })
   }
 
   readonly addEntries: addEntries = async (entries = []) =>
-    this.collection
+    this.directoryCollection
       .insertMany(
         entries.map((entry: Entry) => ({
           ipfsDirectoryHash: entry.ipfsDirectoryHash,
@@ -58,7 +58,7 @@ export class DirectoryDAO {
     retryDelay = minutesToMiliseconds(20),
     maxAttempts = 20,
   } = {}) =>
-    this.collection.findOne({
+    this.directoryCollection.findOne({
       ipfsDirectoryHash: { $exists: true },
       $and: [
         {
@@ -78,7 +78,7 @@ export class DirectoryDAO {
     })
 
   readonly setEntrySuccessTime: setEntrySuccessTime = ({ ipfsDirectoryHash, successTime = new Date().getTime() }) =>
-    this.collection.updateOne(
+    this.directoryCollection.updateOne(
       { ipfsDirectoryHash },
       {
         $set: { successTime },
@@ -86,7 +86,7 @@ export class DirectoryDAO {
     )
 
   readonly incEntryAttempts: incEntryAttempts = ({ ipfsDirectoryHash, lastAttemptTime = new Date().getTime() }) =>
-    this.collection.updateOne(
+    this.directoryCollection.updateOne(
       { ipfsDirectoryHash },
       {
         $set: { lastAttemptTime },
