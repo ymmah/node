@@ -26,6 +26,13 @@ export class ClaimController {
     return { ipfsFileHashes, ipfsDirectoryHash }
   }
 
-  completeHashes = async (ipfsFileHashes: ReadonlyArray<string>) =>
-    this.fileDAO.setEntrySuccessTimes(ipfsFileHashes.map((ipfsFileHash: string) => ({ ipfsFileHash })))
+  completeHashes = async ({
+    ipfsFileHashes,
+    ipfsDirectoryHash,
+  }: {
+    ipfsFileHashes: ReadonlyArray<string>
+    ipfsDirectoryHash: string
+  }) => {
+    await this.fileDAO.completeEntries(ipfsFileHashes.map(ipfsFileHash => ({ ipfsFileHash, ipfsDirectoryHash })))
+  }
 }

@@ -76,7 +76,7 @@ export class Router {
     const { ipfsFileHashes, ipfsDirectoryHash } = JSON.parse(messageContent)
     logger.trace({ ipfsFileHashes, ipfsDirectoryHash }, 'Mark hashes complete request')
     try {
-      await this.claimController.completeHashes(ipfsFileHashes)
+      await this.claimController.completeHashes({ipfsFileHashes, ipfsDirectoryHash})
       await this.messaging.publish(Exchange.BatchWriterCompleteHashesSuccess, { ipfsFileHashes, ipfsDirectoryHash })
       logger.info({ ipfsFileHashes, ipfsDirectoryHash }, 'Mark hashes complete success')
     } catch (error) {

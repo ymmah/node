@@ -4,6 +4,7 @@ import { Collection, InsertOneWriteOpResult, UpdateWriteOpResult } from 'mongodb
 export interface Entry {
   _id?: string
   ipfsFileHash: string
+  ipfsDirectoryHash?: string
   successTime?: number
 }
 
@@ -13,9 +14,9 @@ type addEntry = (x: Entry) => Promise<InsertOneWriteOpResult>
 
 type findNextEntries = () => Promise<ReadonlyArray<Entry>>
 
-type setEntrySuccessTime = (x: Entry) => Promise<UpdateWriteOpResult>
+type completeEntry = (x: Entry) => Promise<UpdateWriteOpResult>
 
-type setEntrySuccessTimes = (xs: ReadonlyArray<Entry>) => Promise<ReadonlyArray<UpdateWriteOpResult>>
+type completeEntries = (xs: ReadonlyArray<Entry>) => Promise<ReadonlyArray<UpdateWriteOpResult>>
 
 @injectable()
 export class FileDAO {
@@ -29,18 +30,19 @@ export class FileDAO {
     await this.fileCollection.createIndex({ ipfsFileHash: 1 }, { unique: true })
   }
 
-  addEntry: addEntry = ({ ipfsFileHash }) => this.fileCollection.insertOne({ ipfsFileHash, successTime: null })
+  addEntry: addEntry = ({ ipfsFileHash }) =>
+    this.fileCollection.insertOne({ ipfsFileHash, successTime: null, ipfsDirectoryHash: null })
 
   findNextEntries: findNextEntries = () =>
     this.fileCollection.find({ successTime: null }, { fields: { _id: false, ipfsFileHash: true } }).toArray()
 
-  setEntrySuccessTime: setEntrySuccessTime = ({ ipfsFileHash = '', successTime = new Date().getTime() }) =>
-    this.fileCollection.updateOne({ ipfsFileHash }, { $set: { successTime } })
+  completeEntry: completeEntry = ({ ipfsFileHash, successTime = new Date().getTime(), ipfsDirectoryHash }) =>
+    this.fileCollection.updateOne({ ipfsFileHash }, { $set: { successTime, ipfsDirectoryHash } })
 
-  setEntrySuccessTimes: setEntrySuccessTimes = (entries = []) =>
+  completeEntries: completeEntries = (entries = []) =>
     Promise.all(
-      entries.map(({ ipfsFileHash, successTime = new Date().getTime() }) =>
-        this.setEntrySuccessTime({ ipfsFileHash, successTime })
+      entries.map(({ ipfsFileHash, successTime, ipfsDirectoryHash }) =>
+        this.completeEntry({ ipfsFileHash, successTime, ipfsDirectoryHash })
       )
     )
 }
