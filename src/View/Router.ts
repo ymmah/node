@@ -30,6 +30,10 @@ export class Router {
     await this.messaging.consume(Exchange.IPFSHashTxId, this.onIPFSHashTxId)
     await this.messaging.consumePoetTimestampsDownloaded(this.onPoetTimestampsDownloaded)
     await this.messaging.consumeClaimsDownloaded(this.onClaimsDownloaded)
+    await this.messaging.consume(
+      Exchange.BatchReaderReadNextDirectorySuccess,
+      this.onBatchReaderReadNextDirectorySuccess
+    )
   }
 
   onNewClaim = (message: any) => {
@@ -66,5 +70,17 @@ export class Router {
     logger.trace({ claimIPFSHashPairs }, 'Downloaded a (IPFS Hash, Claim Id) Pair')
 
     await this.workController.upsertClaimIPFSHashPair(claimIPFSHashPairs)
+  }
+
+  onBatchReaderReadNextDirectorySuccess = async (message: any) => {
+    const logger = this.logger.child({ method: 'onBatchReaderReadNextDirectorySuccess' })
+    const messageContent = message.content.toString()
+    const { ipfsFileHashes, ipfsDirectoryHash } = JSON.parse(messageContent)
+    logger.info({ ipfsFileHashes, ipfsDirectoryHash }, 'Setting ipfsDirectoryHash on works')
+    try {
+      await this.workController.setDirectoryHashOnEntries({ ipfsFileHashes, ipfsDirectoryHash })
+    } catch (error) {
+      logger.error({ error, ipfsFileHashes, ipfsDirectoryHash }, 'Failed to set ipfsDirectoryHash on works')
+    }
   }
 }

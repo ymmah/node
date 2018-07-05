@@ -61,4 +61,24 @@ export class WorkController {
       )
     )
   }
+
+  async setDirectoryHashOnEntries({
+    ipfsFileHashes,
+    ipfsDirectoryHash,
+  }: {
+    ipfsFileHashes: ReadonlyArray<string>
+    ipfsDirectoryHash: string
+  }) {
+    const logger = this.logger.child({ method: 'setDirectoryHash' })
+    logger.info({ ipfsFileHashes, ipfsDirectoryHash }, 'setting directory hash on work entries')
+    await Promise.all(
+      ipfsFileHashes.map(ipfsFileHash =>
+        this.collection.updateOne(
+          { 'timestamp.ipfsHash': ipfsFileHash },
+          { $set: { 'timestamp.ipfsDirectoryHash': ipfsDirectoryHash } },
+          { upsert: true }
+        )
+      )
+    )
+  }
 }
