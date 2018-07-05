@@ -5,9 +5,9 @@ export enum Exchange {
   BatchWriterCreateNextBatchSuccess = 'BATCH_WRITER::CREATE_NEXT_BATCH_SUCCESS',
   BatchWriterCompleteHashesRequest = 'BATCH_WRITER::COMPLETE_HASHES_REQUEST',
   BatchWriterCompleteHashesSuccess = 'BATCH_WRITER::COMPLETE_HASHES_SUCCESS',
-  BlockchainWriterTimestampRequest = 'BLOCKCHAIN_WRITER::TIMESTAMP_REQUEST',
-  BlockchainWriterTimestampSuccess = 'BLOCKCHAIN_WRITER::TIMESTAMP_SUCCESS',
-  BlockchainWriterTimestampFailure = 'BLOCKCHAIN_WRITER::TIMESTAMP_FAILURE',
+  BlockchainWriterRequestTimestampRequest = 'BLOCKCHAIN_WRITER::TIMESTAMP_REQUEST',
+  BlockchainWriterRequestTimestampSuccess = 'BLOCKCHAIN_WRITER::TIMESTAMP_SUCCESS',
+  BlockchainWriterRequestTimestampFailure = 'BLOCKCHAIN_WRITER::TIMESTAMP_FAILURE',
 
   // Event, a new claim has been submitted by a client
   NewClaim = 'NEW_CLAIM',

@@ -25,7 +25,10 @@ export class Router {
 
   async start() {
     await this.messaging.consume(Exchange.BatchWriterCreateNextBatchSuccess, this.onBatchWriterCreateNextBatchSuccess)
-    await this.messaging.consume(Exchange.BlockchainWriterTimestampRequest, this.onBlockchainWriterTimestampRequest)
+    await this.messaging.consume(
+      Exchange.BlockchainWriterRequestTimestampRequest,
+      this.onBlockchainWriterRequestTimestampRequest
+    )
   }
 
   onBatchWriterCreateNextBatchSuccess = async (message: any): Promise<void> => {
@@ -34,14 +37,17 @@ export class Router {
     const { ipfsFileHashes, ipfsDirectoryHash } = JSON.parse(messageContent)
     try {
       if (ipfsFileHashes.length > 0)
-        await this.messaging.publish(Exchange.BlockchainWriterTimestampRequest, { ipfsFileHashes, ipfsDirectoryHash })
+        await this.messaging.publish(Exchange.BlockchainWriterRequestTimestampRequest, {
+          ipfsFileHashes,
+          ipfsDirectoryHash,
+        })
     } catch (error) {
-      logger.error({ ipfsFileHashes, ipfsDirectoryHash }, 'Failed to publish BlockchainWriterTimestampRequest')
+      logger.error({ ipfsFileHashes, ipfsDirectoryHash }, 'Failed to publish BlockchainWriterRequestTimestampRequest')
     }
   }
 
-  onBlockchainWriterTimestampRequest = async (message: any): Promise<void> => {
-    const logger = this.logger.child({ method: 'onBlockchainWriterTimestampRequest' })
+  onBlockchainWriterRequestTimestampRequest = async (message: any): Promise<void> => {
+    const logger = this.logger.child({ method: 'onBlockchainWriterRequestTimestampRequest' })
 
     const messageContent = message.content.toString()
     const { ipfsFileHashes, ipfsDirectoryHash } = JSON.parse(messageContent)
@@ -77,9 +83,12 @@ export class Router {
   }): Promise<void> => {
     try {
       await this.claimController.requestTimestamp(ipfsDirectoryHash)
-      await this.messaging.publish(Exchange.BlockchainWriterTimestampSuccess, { ipfsFileHashes, ipfsDirectoryHash })
+      await this.messaging.publish(Exchange.BlockchainWriterRequestTimestampSuccess, {
+        ipfsFileHashes,
+        ipfsDirectoryHash,
+      })
     } catch (error) {
-      await this.messaging.publish(Exchange.BlockchainWriterTimestampFailure, {
+      await this.messaging.publish(Exchange.BlockchainWriterRequestTimestampFailure, {
         error,
         ipfsFileHashes,
         ipfsDirectoryHash,
