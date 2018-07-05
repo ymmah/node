@@ -27,10 +27,9 @@ export class Router {
     await this.messaging.consume(Exchange.ClaimIPFSHash, this.onClaimIPFSHash)
     await this.messaging.consume(Exchange.BatchWriterCreateNextBatchRequest, this.onBatchWriterCreateNextBatchRequest)
     await this.messaging.consume(
-      Exchange.BlockchainWriterRequestTimestampSuccess,
-      this.onBlockchainWriterRequestTimestampSuccess
+      Exchange.BlockchainWriterTimestampRequestCreated,
+      this.onBlockchainWriterTimestampRequestCreated
     )
-    await this.messaging.consume(Exchange.BatchWriterCompleteHashesRequest, this.onBatchWriterCompleteHashesRequest)
   }
 
   onClaimIPFSHash = async (message: any): Promise<void> => {
@@ -55,35 +54,24 @@ export class Router {
     logger.trace('Create next batch request')
     try {
       const { ipfsFileHashes, ipfsDirectoryHash } = await this.claimController.createNextBatch()
-      await this.messaging.publish(Exchange.BatchWriterCreateNextBatchSuccess, { ipfsFileHashes, ipfsDirectoryHash })
+      if (ipfsFileHashes.length > 0)
+        await this.messaging.publish(Exchange.BatchWriterCreateNextBatchSuccess, { ipfsFileHashes, ipfsDirectoryHash })
       logger.info({ ipfsFileHashes, ipfsDirectoryHash }, 'Create next batch success')
     } catch (error) {
       logger.error({ error }, 'Create next batch failure')
     }
   }
 
-  onBlockchainWriterRequestTimestampSuccess = async (message: any): Promise<void> => {
-    const logger = this.logger.child({ method: 'onBatchWriterCompleteHashesRequest' })
+  onBlockchainWriterTimestampRequestCreated = async (message: any): Promise<void> => {
+    const logger = this.logger.child({ method: 'onBlockchainWriterTimestampRequestCreated' })
     const messageContent = message.content.toString()
     const { ipfsFileHashes, ipfsDirectoryHash } = JSON.parse(messageContent)
-    try {
-      await this.messaging.publish(Exchange.BatchWriterCompleteHashesRequest, { ipfsFileHashes, ipfsDirectoryHash })
-    } catch (error) {
-      logger.error({ ipfsFileHashes, ipfsDirectoryHash }, 'Failed to publish BatchWriterCompleteHashesRequest')
-    }
-  }
-
-  onBatchWriterCompleteHashesRequest = async (message: any): Promise<void> => {
-    const logger = this.logger.child({ method: 'onBatchWriterCompleteHashesRequest' })
-    const messageContent = message.content.toString()
-    const { ipfsFileHashes, ipfsDirectoryHash } = JSON.parse(messageContent)
-    logger.trace({ ipfsFileHashes, ipfsDirectoryHash }, 'Mark hashes complete request')
+    logger.trace({ ipfsFileHashes, ipfsDirectoryHash }, 'Marking hashes as complete')
     try {
       await this.claimController.completeHashes({ ipfsFileHashes, ipfsDirectoryHash })
-      await this.messaging.publish(Exchange.BatchWriterCompleteHashesSuccess, { ipfsFileHashes, ipfsDirectoryHash })
-      logger.info({ ipfsFileHashes, ipfsDirectoryHash }, 'Mark hashes complete success')
+      logger.info({ ipfsFileHashes, ipfsDirectoryHash }, 'Succesfully marked hashes complete')
     } catch (error) {
-      logger.error({ error, ipfsFileHashes, ipfsDirectoryHash }, 'Mark hashes complete failure')
+      logger.error({ error, ipfsFileHashes, ipfsDirectoryHash }, 'Failed to marke hashes complete')
     }
   }
 }
