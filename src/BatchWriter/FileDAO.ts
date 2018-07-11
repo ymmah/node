@@ -8,7 +8,7 @@ export interface Entry {
   successTime?: number
 }
 
-type init = () => Promise<void>
+type start = () => Promise<void>
 
 type addEntry = (x: Entry) => Promise<InsertOneWriteOpResult>
 
@@ -26,7 +26,7 @@ export class FileDAO {
     this.fileCollection = fileCollection
   }
 
-  init: init = async () => {
+  start: start = async () => {
     await this.fileCollection.createIndex({ ipfsFileHash: 1 }, { unique: true })
   }
 
