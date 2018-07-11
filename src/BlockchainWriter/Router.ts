@@ -34,11 +34,10 @@ export class Router {
     const logger = this.logger.child({ method: 'onBlockchainWriterRequestTimestampRequest' })
 
     const messageContent = message.content.toString()
-    const { ipfsFileHashes, ipfsDirectoryHash } = JSON.parse(messageContent)
+    const { ipfsDirectoryHash } = JSON.parse(messageContent)
 
     logger.trace(
       {
-        ipfsFileHashes,
         ipfsDirectoryHash,
       },
       'creating timestamp request'
@@ -46,13 +45,12 @@ export class Router {
 
     try {
       await this.claimController.requestTimestamp(ipfsDirectoryHash)
-      logger.trace({ ipfsFileHashes, ipfsDirectoryHash }, 'Timestamp request created')
+      logger.trace({ ipfsDirectoryHash }, 'Timestamp request created')
     } catch (error) {
       logger.error(
         {
           error,
           ipfsDirectoryHash,
-          ipfsFileHashes,
         },
         'Timestamp request failure'
       )
