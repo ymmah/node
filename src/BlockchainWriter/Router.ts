@@ -46,10 +46,6 @@ export class Router {
 
     try {
       await this.claimController.requestTimestamp(ipfsDirectoryHash)
-      await this.messaging.publish(Exchange.BlockchainWriterTimestampRequestCreated, {
-        ipfsFileHashes,
-        ipfsDirectoryHash,
-      })
       logger.trace({ ipfsFileHashes, ipfsDirectoryHash }, 'Timestamp request created')
     } catch (error) {
       logger.error(

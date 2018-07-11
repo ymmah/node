@@ -3,7 +3,6 @@ export enum Exchange {
   BatchReaderReadNextDirectorySuccess = 'BATCH_READER::READ_NEXT_DIRECTORY_SUCCESS',
   BatchWriterCreateNextBatchRequest = 'BATCH_WRITER::CREATE_NEXT_BATCH_REQUEST',
   BatchWriterCreateNextBatchSuccess = 'BATCH_WRITER::CREATE_NEXT_BATCH_SUCCESS',
-  BlockchainWriterTimestampRequestCreated = 'BLOCKCHAIN_WRITER::TIMESTAMP_REQUEST_CREATED',
 
   // Event, a new claim has been submitted by a client
   NewClaim = 'NEW_CLAIM',
