@@ -6,7 +6,7 @@ interface IPFSConfiguration {
   readonly ipfsUrl: string
 }
 
-interface FetchConfiguration {
+interface FetchOptions {
   readonly timeout: number
 }
 
@@ -34,9 +34,9 @@ interface LSResult {
 
 type addFileToDirectory = (directoryHash: string, fileName: string, filehash: string) => Promise<IPFSObject>
 
-type addText = (text: string, x?: FetchConfiguration) => Promise<IPFSObject>
+type addText = (text: string, x?: FetchOptions) => Promise<IPFSObject>
 
-type cat = (s: string, x?: FetchConfiguration) => Promise<Response["buffer"]>
+type cat = (s: string, x?: FetchOptions) => Promise<Response['buffer']>
 
 type createEmptyDirectory = () => Promise<IPFSObject>
 
@@ -58,7 +58,7 @@ export class IPFS {
     return await response.json()
   }
 
-  addText: addText = async (text: string, fetchConfiguration) => {
+  addText: addText = async (text: string, fetchOptions) => {
     const formData = new FormData() // { maxDataSize: 20971520 }
 
     formData.append('file', str(text), {
@@ -68,7 +68,7 @@ export class IPFS {
     })
 
     const response = await fetch(`${this.url}/api/v0/add`, {
-      ...fetchConfiguration,
+      ...fetchOptions,
       method: 'post',
       body: formData,
     })
