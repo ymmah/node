@@ -58,7 +58,7 @@ export class IPFS {
     return await response.json()
   }
 
-  addText: addText = async (text: string, fetchOptions) => {
+  addText: addText = async (text, fetchOptions) => {
     const formData = new FormData() // { maxDataSize: 20971520 }
 
     formData.append('file', str(text), {
