@@ -2,8 +2,6 @@ import * as FormData from 'form-data'
 import fetch from 'node-fetch'
 import * as str from 'string-to-stream'
 
-import { secondsToMiliseconds } from 'Helpers/Time'
-
 interface IPFSConfiguration {
   readonly ipfsUrl: string
 }
@@ -34,7 +32,6 @@ interface LSResult {
   }
 }
 
-
 type addFileToDirectory = (directoryHash: string, fileName: string, filehash: string) => Promise<IPFSObject>
 
 type addText = (text: string, x?: FetchConfiguration) => Promise<IPFSObject>
@@ -46,7 +43,6 @@ type createEmptyDirectory = () => Promise<IPFSObject>
 type getDirectoryFileHashes = (s: string) => Promise<ReadonlyArray<string>>
 
 type ls = (s: string) => Promise<LSResult>
-
 
 export class IPFS {
   private readonly url: string
@@ -82,7 +78,6 @@ export class IPFS {
 
   cat: cat = async (hash, fetchOptions) => {
     const response = await fetch(`${this.url}/api/v0/cat?arg=${hash}`, fetchOptions)
-    // reminder, check to see why this is text and not json
     return response.text()
   }
 
@@ -91,12 +86,12 @@ export class IPFS {
     return await response.json()
   }
 
-  getDirectoryFileHashes: getDirectoryFileHashes = async (hash) => {
+  getDirectoryFileHashes: getDirectoryFileHashes = async hash => {
     const response = await this.ls(hash)
     return response.Objects[hash].Links.map(x => x.Hash)
   }
 
-  ls: ls = async (hash) => {
+  ls: ls = async hash => {
     const response = await fetch(`${this.url}/api/v0/file/ls?arg=${hash}`)
     return await response.json()
   }
