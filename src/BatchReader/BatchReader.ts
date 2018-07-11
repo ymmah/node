@@ -43,7 +43,6 @@ export class BatchReader {
 
     this.service = this.container.get('Service')
     await this.service.start()
-
     const directoryDAO: DirectoryDAO = this.container.get('DirectoryDAO')
     await directoryDAO.start()
 

@@ -44,7 +44,6 @@ export class BatchWriter {
 
     this.service = this.container.get('Service')
     await this.service.start()
-
     const fileDAO: FileDAO = this.container.get('FileDAO')
     await fileDAO.start()
 
