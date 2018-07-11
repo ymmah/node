@@ -1,5 +1,5 @@
 import * as FormData from 'form-data'
-import fetch from 'node-fetch'
+import fetch, { Response } from 'node-fetch'
 import * as str from 'string-to-stream'
 
 interface IPFSConfiguration {
@@ -36,7 +36,7 @@ type addFileToDirectory = (directoryHash: string, fileName: string, filehash: st
 
 type addText = (text: string, x?: FetchConfiguration) => Promise<IPFSObject>
 
-type cat = (s: string, x?: FetchConfiguration) => Promise<string>
+type cat = (s: string, x?: FetchConfiguration) => Promise<Response["buffer"]>
 
 type createEmptyDirectory = () => Promise<IPFSObject>
 
@@ -78,7 +78,7 @@ export class IPFS {
 
   cat: cat = async (hash, fetchOptions) => {
     const response = await fetch(`${this.url}/api/v0/cat?arg=${hash}`, fetchOptions)
-    return response.text()
+    return response.json()
   }
 
   createEmptyDirectory: createEmptyDirectory = async () => {
