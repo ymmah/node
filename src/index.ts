@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 
 /* tslint:disable:no-console */
-import 'Error'
 import * as Pino from 'pino'
 import 'reflect-metadata'
 
+import 'Extensions/Error'
 import 'Extensions/Promise'
 
 import { API } from 'API/API'
