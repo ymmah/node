@@ -83,7 +83,7 @@ export class Router {
 
   private getWorks = async (context: KoaRouter.IRouterContext, next: () => Promise<any>) => {
     this.logger.trace({ query: context.query }, '/works?publicKey=')
-    const publicKey = context.query.publicKey ? context.query.publicKey : undefined
+    const publicKey = context.query.publicKey
     const works = await this.workController.getByPublicKey(publicKey)
 
     context.body = works
