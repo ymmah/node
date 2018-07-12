@@ -34,6 +34,7 @@ export class Router {
       Exchange.BatchReaderReadNextDirectorySuccess,
       this.onBatchReaderReadNextDirectorySuccess
     )
+    await this.messaging.consume(Exchange.BatchWriterCreateNextBatchSuccess, this.onBatchWriterCreateNextBatchSuccess)
   }
 
   onNewClaim = (message: any) => {
@@ -81,6 +82,35 @@ export class Router {
       await this.workController.setDirectoryHashOnEntries({ ipfsFileHashes, ipfsDirectoryHash })
     } catch (error) {
       logger.error({ error, ipfsFileHashes, ipfsDirectoryHash }, 'Failed to set ipfsDirectoryHash on works')
+    }
+  }
+
+  onBatchWriterCreateNextBatchSuccess = async (message: any): Promise<void> => {
+    const logger = this.logger.child({ method: 'onBlockchainWriterRequestTimestampRequest' })
+
+    const messageContent = message.content.toString()
+    const { ipfsFileHashes, ipfsDirectoryHash } = JSON.parse(messageContent)
+
+    logger.trace(
+      {
+        ipfsDirectoryHash,
+        ipfsFileHashes,
+      },
+      'Adding IPFS Directory Hash to claims'
+    )
+
+    try {
+      await this.workController.setDirectoryHashOnEntries({ ipfsDirectoryHash, ipfsFileHashes })
+      logger.trace({ ipfsDirectoryHash, ipfsFileHashes }, 'IPFS Directory Hash set successfully')
+    } catch (error) {
+      logger.error(
+        {
+          ipfsDirectoryHash,
+          ipfsFileHashes,
+          error,
+        },
+        'Error setting IPFS Directory Hash'
+      )
     }
   }
 }
