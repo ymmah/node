@@ -40,7 +40,7 @@ export class Service {
     const logger = this.logger.child({ method: 'readNextDirectory' })
     try {
       await this.messaging.publish(Exchange.BatchReaderReadNextDirectoryRequest, '')
-    } catch(error) {
+    } catch (error) {
       logger.error({ error }, 'Uncaught exception in BatchReader Service')
     }
   }

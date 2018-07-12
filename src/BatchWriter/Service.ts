@@ -40,7 +40,7 @@ export class Service {
     const logger = this.logger.child({ method: 'readNextDirectory' })
     try {
       await this.messaging.publish(Exchange.BatchWriterCreateNextBatchRequest, '')
-    } catch(error) {
+    } catch (error) {
       logger.error({ error }, 'Uncaught exception in BatchWriter Service')
     }
   }
