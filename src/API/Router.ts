@@ -41,29 +41,20 @@ export class Router {
     this.configuration = configuration
     this.workController = workController
 
-    const getWorksSchema = {
+    const getWorkSchema = {
       params: {
         id: Joi.string().required(),
       },
     }
 
-    const getWorkSchema = {
-      query: {},
-    }
-
-    const getWorkByPublicKeySchema = {
+    const getWorksSchema = {
       query: {
-        publicKey: Joi.string().required(),
+        publicKey: Joi.string().optional(),
       },
     }
 
-    this.koaRouter.get('/works/:id', RequestValidationMiddleware(getWorksSchema), this.getWork)
-    this.koaRouter.get('/works', RequestValidationMiddleware(getWorkSchema), this.getWorks)
-    this.koaRouter.get(
-      '/works?publicKey=',
-      RequestValidationMiddleware(getWorkByPublicKeySchema),
-      this.getWorksByPublicKey
-    )
+    this.koaRouter.get('/works/:id', RequestValidationMiddleware(getWorkSchema), this.getWork)
+    this.koaRouter.get('/works', RequestValidationMiddleware(getWorksSchema), this.getWorks)
     this.koaRouter.post('/works', this.postWork)
 
     this.koa.use(helmet(SecurityHeaders))
@@ -91,16 +82,8 @@ export class Router {
   }
 
   private getWorks = async (context: KoaRouter.IRouterContext, next: () => Promise<any>) => {
-    this.logger.trace({ query: context.query }, 'GET /works')
-
-    const works = await this.workController.getWorks()
-
-    context.body = works
-  }
-
-  private getWorksByPublicKey = async (context: KoaRouter.IRouterContext, next: () => Promise<any>) => {
     this.logger.trace({ query: context.query }, '/works?publicKey=')
-    const publicKey = context.query.publicKey
+    const publicKey = context.query.publicKey ? context.query.publicKey : undefined
     const works = await this.workController.getByPublicKey(publicKey)
 
     context.body = works

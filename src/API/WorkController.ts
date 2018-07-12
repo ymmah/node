@@ -26,14 +26,11 @@ export class WorkController {
     return this.collection.findOne({ id }, { fields: { _id: false } })
   }
 
-  async getWorks(): Promise<any> {
-    this.logger.trace({ method: 'getWorks' }, 'Getting Works from DB')
-    return this.collection.find({}, { fields: { _id: false } }).toArray()
-  }
-
-  async getByPublicKey(publicKey: string): Promise<any> {
+  async getByPublicKey(publicKey?: string): Promise<any> {
     this.logger.trace({ method: 'getByPublicKey', publicKey }, 'Getting Works by Public Key from DB')
-    return this.collection.find({ publicKey }, { fields: { _id: false } }).toArray()
+    return publicKey ?
+      this.collection.find({ publicKey }, { fields: { _id: false } }).toArray() :
+      this.collection.find({}, { fields: { _id: false } }).toArray()
   }
 
   async create(work: Work): Promise<void> {
