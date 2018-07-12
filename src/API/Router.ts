@@ -59,7 +59,11 @@ export class Router {
 
     this.koaRouter.get('/works/:id', RequestValidationMiddleware(getWorksSchema), this.getWork)
     this.koaRouter.get('/works', RequestValidationMiddleware(getWorkSchema), this.getWorks)
-    this.koaRouter.get('/works?publicKey=', RequestValidationMiddleware(getWorkByPublicKeySchema), this.getWorksByPublicKey)
+    this.koaRouter.get(
+      '/works?publicKey=',
+      RequestValidationMiddleware(getWorkByPublicKeySchema),
+      this.getWorksByPublicKey
+    )
     this.koaRouter.post('/works', this.postWork)
 
     this.koa.use(helmet(SecurityHeaders))
@@ -101,7 +105,7 @@ export class Router {
 
     context.body = works
   }
-  
+
   private postWork = async (context: KoaRouter.IRouterContext, next: () => Promise<any>) => {
     this.logger.trace({ body: context.request.body }, 'POST /works')
 

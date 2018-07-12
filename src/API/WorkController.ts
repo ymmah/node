@@ -27,7 +27,7 @@ export class WorkController {
   }
 
   async getWorks(): Promise<any> {
-    this.logger.trace({ method: 'getWorks'}, 'Getting Works from DB')
+    this.logger.trace({ method: 'getWorks' }, 'Getting Works from DB')
     return this.collection.find({}, { fields: { _id: false } }).toArray()
   }
 
