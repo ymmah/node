@@ -3,10 +3,10 @@ import { inject, injectable } from 'inversify'
 import { Collection, Db } from 'mongodb'
 import * as Pino from 'pino'
 
+import 'Extensions/Array'
 import { childWithFileName } from 'Helpers/Logging'
 import { Exchange } from 'Messaging/Messages'
 import { Messaging } from 'Messaging/Messaging'
-import 'Extensions/Array'
 
 interface WorksFilters {
   readonly publicKey?: string
@@ -32,10 +32,7 @@ export class WorkController {
   }
 
   async getByFilters(worksFilters: WorksFilters = {}): Promise<any> {
-    const definedFilters = Object.entries(worksFilters)
-      .filter(([key, value]) => value !== undefined)
-      .toObject()
-    return this.collection.find(definedFilters, { fields: { _id: false } }).toArray()
+    return this.collection.find(worksFilters, { fields: { _id: false } }).toArray()
   }
 
   async create(work: Work): Promise<void> {
