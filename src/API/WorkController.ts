@@ -6,6 +6,11 @@ import * as Pino from 'pino'
 import { childWithFileName } from 'Helpers/Logging'
 import { Exchange } from 'Messaging/Messages'
 import { Messaging } from 'Messaging/Messaging'
+import 'Extensions/Array'
+
+interface WorksFilters {
+  readonly publicKey?: string
+}
 
 @injectable()
 export class WorkController {
@@ -26,11 +31,11 @@ export class WorkController {
     return this.collection.findOne({ id }, { fields: { _id: false } })
   }
 
-  async getByPublicKey(publicKey?: string): Promise<any> {
-    this.logger.trace({ method: 'getByPublicKey', publicKey }, 'Getting Works by Public Key from DB')
-    return publicKey
-      ? this.collection.find({ publicKey }, { fields: { _id: false } }).toArray()
-      : this.collection.find({}, { fields: { _id: false } }).toArray()
+  async getByFilters(worksFilters: WorksFilters = {}): Promise<any> {
+    const definedFilters = Object.entries(worksFilters)
+      .filter(([key, value]) => value !== undefined)
+      .toObject()
+    return this.collection.find(definedFilters, { fields: { _id: false } }).toArray()
   }
 
   async create(work: Work): Promise<void> {
