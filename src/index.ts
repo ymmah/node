@@ -5,8 +5,8 @@ import 'Error'
 import * as Pino from 'pino'
 import 'reflect-metadata'
 
-import 'Extensions/Promise'
 import 'Extensions/Array'
+import 'Extensions/Promise'
 
 import { API } from 'API/API'
 import { BlockchainReader } from 'BlockchainReader/BlockchainReader'
