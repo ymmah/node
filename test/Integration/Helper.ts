@@ -27,7 +27,6 @@ export class Client {
   getWorksByPublicKey(publicKey: string) {
     return fetch(this.url + '/works/?publicKey=' + publicKey)
   }
-  
 
   postWork(claim: Claim) {
     return fetch(this.url + '/works/', {
