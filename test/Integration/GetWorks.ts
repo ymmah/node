@@ -1,8 +1,7 @@
 /* tslint:disable:no-relative-imports */
-import { Claim, isClaim, Work } from '@po.et/poet-js'
+import { Claim, isClaim } from '@po.et/poet-js'
 import { AsyncTest, Expect, SetupFixture, TestCase, TestFixture } from 'alsatian'
 
-import { AStudyInScarlet, TheMurdersInTheRueMorgue, TheRaven } from '../Claims'
 import { Client } from './Helper'
 
 @TestFixture('GET /works')
@@ -53,7 +52,7 @@ export class GetWorks {
 
   @AsyncTest()
   @TestCase()
-  async getWorksShouldReturnExpectedFields(expectedClaims: ReadonlyArray<Work>) {
+  async getWorksShouldReturnExpectedFields() {
     const response = await this.client.getWorks()
 
     Expect(response.status).toBe(200)
@@ -66,11 +65,11 @@ export class GetWorks {
       dateCreated: new Date(_.dateCreated),
     }))
 
-    for (let i = 0; i < claims.length; i++) {
-      Expect(claims[i].id).toBe(expectedClaims[i].id)
-      Expect(claims[i].publicKey).toBe(expectedClaims[i].publicKey)
-      Expect(claims[i].signature).toBe(expectedClaims[i].signature)
-      Expect(claims[i].dateCreated.toISOString()).toBe(expectedClaims[i].dateCreated.toISOString())
+    for (const claim of claims) {
+      Expect(claim.id).toBeTruthy()
+      Expect(claim.publicKey).toBeTruthy()
+      Expect(claim.signature).toBeTruthy()
+      Expect(claim.dateCreated.toISOString()).toBeTruthy()
     }
   }
 
