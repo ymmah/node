@@ -1,6 +1,6 @@
+import { PoetTimestamp } from '@po.et/poet-js'
 import { inject, injectable } from 'inversify'
 import { Collection, UpdateWriteOpResult } from 'mongodb'
-import { PoetTimestamp } from '@po.et/poet-js'
 
 type upsertEntry = (x: PoetTimestamp) => Promise<UpdateWriteOpResult>
 
@@ -16,14 +16,14 @@ export class RawEntryDAO {
     this.rawEntryCollection = rawEntryCollection
   }
 
-  upsertEntry: upsertEntry = (timestamp) =>
+  upsertEntry: upsertEntry = timestamp =>
     this.rawEntryCollection.updateOne(
-        { 'timestamp.ipfsHash': timestamp.ipfsHash },
-        { $set: { timestamp } },
-        { upsert: true }
+      { 'timestamp.ipfsHash': timestamp.ipfsHash },
+      { $set: { timestamp } },
+      { upsert: true }
     )
 
-    upsertEntries: upsertEntries = (timestamps) => Promise.all(timestamps.map(this.upsertEntry))
+  upsertEntries: upsertEntries = timestamps => Promise.all(timestamps.map(this.upsertEntry))
 
-    getEntry: getEntry = (ipfsDirectoryHash) => this.rawEntryCollection.findOne({ 'timestamp.ipfsHash': ipfsDirectoryHash })
+  getEntry: getEntry = ipfsDirectoryHash => this.rawEntryCollection.findOne({ 'timestamp.ipfsHash': ipfsDirectoryHash })
 }
