@@ -1,8 +1,8 @@
-import { ClaimIPFSHashPair, PoetTimestamp } from '@po.et/poet-js'
 import { inject, injectable } from 'inversify'
 import * as Pino from 'pino'
 
 import { childWithFileName } from 'Helpers/Logging'
+import { ClaimIPFSHashPair, PoetTimestamp } from 'Interfaces'
 import { Exchange } from 'Messaging/Messages'
 import { Messaging } from 'Messaging/Messaging'
 
@@ -37,24 +37,24 @@ export class Router {
     await this.messaging.consume(Exchange.BatchWriterCreateNextBatchSuccess, this.onBatchWriterCreateNextBatchSuccess)
   }
 
-  onNewClaim = (message: any) => {
+  onNewClaim = async (message: any) => {
     const messageContent = message.content.toString()
 
-    this.workController.createWork(JSON.parse(messageContent))
+    await this.workController.createWork(JSON.parse(messageContent))
   }
 
-  onClaimIPFSHash = (message: any) => {
+  onClaimIPFSHash = async (message: any) => {
     const messageContent = message.content.toString()
     const { claimId, ipfsHash } = JSON.parse(messageContent)
 
-    this.workController.setIPFSHash(claimId, ipfsHash)
+    await this.workController.setIPFSHash(claimId, ipfsHash)
   }
 
-  onIPFSHashTxId = (message: any) => {
+  onIPFSHashTxId = async (message: any) => {
     const messageContent = message.content.toString()
     const { ipfsHash, txId } = JSON.parse(messageContent)
 
-    this.workController.setTxId(ipfsHash, txId)
+    await this.workController.setTxId(ipfsHash, txId)
   }
 
   onPoetTimestampsDownloaded = async (poetTimestamps: ReadonlyArray<PoetTimestamp>) => {
