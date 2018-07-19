@@ -64,7 +64,7 @@ const defaultConfiguration: Configuration = {
 
   batchCreationIntervalInSeconds: 600,
 
-  readDirectoryIntervalInSeconds: 30
+  readDirectoryIntervalInSeconds: 30,
 }
 
 export const configurationPath = () => path.join(homedir(), '/.po.et/configuration.json')
