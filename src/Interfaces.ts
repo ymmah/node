@@ -5,7 +5,8 @@ export interface TransactionPoetTimestamp {
   readonly outputIndex: number
   readonly prefix: string
   readonly version: ReadonlyArray<number>
-  readonly ipfsHash: string
+  readonly ipfsFileHash?: string
+  readonly ipfsDirectoryHash: string
 }
 
 export interface PoetTimestamp extends TransactionPoetTimestamp {
@@ -15,14 +16,14 @@ export interface PoetTimestamp extends TransactionPoetTimestamp {
 
 export interface ClaimIPFSHashPair {
   readonly claim: Claim
-  readonly ipfsHash: string
+  readonly ipfsFileHash: string
 }
 
 export function isClaimIPFSHashPair(o: any): o is ClaimIPFSHashPair {
-  return o.claim && isClaim(o.claim) && o.ipfsHash
+  return o.claim && isClaim(o.claim) && o.ipfsFileHash
 }
 
 export interface ClaimIdIPFSHashPair {
   readonly claimId: string
-  readonly ipfsHash: string
+  readonly ipfsFileHash: string
 }

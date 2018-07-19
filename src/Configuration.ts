@@ -48,9 +48,10 @@ const defaultConfiguration: Configuration = {
   poetNetwork: 'BARD',
   poetVersion: [0, 0, 0, 3],
   minimumBlockHeight: 1279550, // Less than 24 hours before Feb 8th, 2018 - Frost's Release
+  forceBlockHeight: 1354413,
   blockchainReaderIntervalInSeconds: 5,
 
-  enableTimestamping: false,
+  enableTimestamping: true,
   timestampIntervalInSeconds: 30,
 
   downloadIntervalInSeconds: 5,
@@ -64,6 +65,8 @@ const defaultConfiguration: Configuration = {
   batchCreationIntervalInSeconds: 600,
 
   readDirectoryIntervalInSeconds: 30,
+  bitcoinAddress: 'mmB9dpW1oH5pjHzJTSudwgHNTi3xDJGWSL',
+  bitcoinAddressPrivateKey: 'cNZ6LtbjwVoMvenPsYWP48vRm3opZWFtkRv3ofRqrA3f2SgTw61B'
 }
 
 export const configurationPath = () => path.join(homedir(), '/.po.et/configuration.json')

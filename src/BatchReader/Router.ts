@@ -34,6 +34,7 @@ export class Router {
 
   onPoetTimestampsDownloaded = async (poetTimestamps: ReadonlyArray<PoetTimestamp>): Promise<void> => {
     const logger = this.logger.child({ method: 'onPoetTimestampsDownloaded' })
+
     logger.trace(
       {
         poetTimestamps,
@@ -42,8 +43,7 @@ export class Router {
     )
 
     try {
-      const entries = poetTimestamps.map(x => ({ ipfsDirectoryHash: x.ipfsHash }))
-      await this.claimController.addEntries(entries)
+      await this.claimController.addEntries(poetTimestamps)
     } catch (error) {
       logger.error({ error, poetTimestamps }, 'Failed to store directory hashes to DB collection')
     }

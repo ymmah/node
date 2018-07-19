@@ -37,6 +37,7 @@ export class Router {
     await this.messaging.consume(Exchange.BatchWriterCreateNextBatchSuccess, this.onBatchWriterCreateNextBatchSuccess)
   }
 
+  // Writing
   onNewClaim = async (message: any) => {
     const messageContent = message.content.toString()
 
@@ -45,44 +46,9 @@ export class Router {
 
   onClaimIPFSHash = async (message: any) => {
     const messageContent = message.content.toString()
-    const { claimId, ipfsHash } = JSON.parse(messageContent)
+    const { claimId, ipfsFileHash } = JSON.parse(messageContent)
 
-    await this.workController.setIPFSHash(claimId, ipfsHash)
-  }
-
-  onIPFSHashTxId = async (message: any) => {
-    const messageContent = message.content.toString()
-    const { ipfsHash, txId } = JSON.parse(messageContent)
-
-    await this.workController.setTxId(ipfsHash, txId)
-  }
-
-  onPoetTimestampsDownloaded = async (poetTimestamps: ReadonlyArray<PoetTimestamp>) => {
-    const logger = this.logger.child({ method: 'onPoetTimestampsDownloaded' })
-
-    logger.trace({ poetTimestamps }, 'Downloaded Po.et Timestamp')
-
-    await this.workController.upsertTimestamps(poetTimestamps)
-  }
-
-  onClaimsDownloaded = async (claimIPFSHashPairs: ReadonlyArray<ClaimIPFSHashPair>) => {
-    const logger = this.logger.child({ method: 'onClaimsDownloaded' })
-
-    logger.trace({ claimIPFSHashPairs }, 'Downloaded a (IPFS Hash, Claim Id) Pair')
-
-    await this.workController.upsertClaimIPFSHashPair(claimIPFSHashPairs)
-  }
-
-  onBatchReaderReadNextDirectorySuccess = async (message: any) => {
-    const logger = this.logger.child({ method: 'onBatchReaderReadNextDirectorySuccess' })
-    const messageContent = message.content.toString()
-    const { ipfsFileHashes, ipfsDirectoryHash } = JSON.parse(messageContent)
-    logger.info({ ipfsFileHashes, ipfsDirectoryHash }, 'Setting ipfsDirectoryHash on works')
-    try {
-      await this.workController.setDirectoryHashOnEntries({ ipfsFileHashes, ipfsDirectoryHash })
-    } catch (error) {
-      logger.error({ error, ipfsFileHashes, ipfsDirectoryHash }, 'Failed to set ipfsDirectoryHash on works')
-    }
+    await this.workController.setIPFSHash(claimId, ipfsFileHash)
   }
 
   onBatchWriterCreateNextBatchSuccess = async (message: any): Promise<void> => {
@@ -112,5 +78,41 @@ export class Router {
         'Error setting IPFS Directory Hash'
       )
     }
+  }
+
+  onIPFSHashTxId = async (message: any) => {
+    const messageContent = message.content.toString()
+    const { ipfsDirectoryHash, txId } = JSON.parse(messageContent)
+
+    await this.workController.setTxId(ipfsDirectoryHash, txId)
+  }
+
+  // Reading
+  onPoetTimestampsDownloaded = async (poetTimestamps: ReadonlyArray<PoetTimestamp>) => {
+    const logger = this.logger.child({ method: 'onPoetTimestampsDownloaded' })
+
+    logger.trace({ poetTimestamps }, 'Downloaded Po.et Timestamp')
+
+    await this.workController.upsertTimestamps(poetTimestamps)
+  }
+
+  onBatchReaderReadNextDirectorySuccess = async (message: any) => {
+    const logger = this.logger.child({ method: 'onBatchReaderReadNextDirectorySuccess' })
+    const messageContent = message.content.toString()
+    const { ipfsFileHashes, ipfsDirectoryHash } = JSON.parse(messageContent)
+    logger.info({ ipfsFileHashes, ipfsDirectoryHash }, 'Setting ipfsDirectoryHash on works')
+    try {
+      await this.workController.setFileHashesForDirecotryHash({ ipfsFileHashes, ipfsDirectoryHash })
+    } catch (error) {
+      logger.error({ error, ipfsFileHashes, ipfsDirectoryHash }, 'Failed to set ipfsDirectoryHash on works')
+    }
+  }
+
+  onClaimsDownloaded = async (claimIPFSHashPairs: ReadonlyArray<ClaimIPFSHashPair>) => {
+    const logger = this.logger.child({ method: 'onClaimsDownloaded' })
+
+    logger.trace({ claimIPFSHashPairs }, 'Downloaded a (IPFS Hash, Claim Id) Pair')
+
+    await this.workController.upsertClaimIPFSHashPair(claimIPFSHashPairs)
   }
 }

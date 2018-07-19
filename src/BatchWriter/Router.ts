@@ -33,7 +33,7 @@ export class Router {
     const logger = this.logger.child({ method: 'onClaimIPFSHash' })
     const messageContent = message.content.toString()
     const item = JSON.parse(messageContent)
-    const ipfsFileHash = item.ipfsHash
+    const ipfsFileHash = item.ipfsFileHash
 
     try {
       await this.claimController.addEntry({ ipfsFileHash })
