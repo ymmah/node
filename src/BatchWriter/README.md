@@ -31,7 +31,7 @@ Implements an API for the IPFS service.
 #### `Router.ts`   
 Handles the communication between the different modules.
 
-In the previous service structure, the router would subscribe to events and call methods on controllers. Those controllers would then publish new messages. In the new system, all the subscribing/publishing and flow logic behaves more like a [saga](https://github.com/redux-saga/redux-saga). This provides more clarity and flexibility.
+In the previous service structure, the router would subscribe to events and call methods on controllers. Those controllers would then publish new messages. In the new system, all the subscribing/publishing of messages is handled by the router. This provides more clarity and flexibility.
 
 #### `Service.ts`
 
