@@ -20,7 +20,7 @@ export class ClaimController {
   createNextBatch = async (): Promise<{ ipfsFileHashes: ReadonlyArray<string>; ipfsDirectoryHash: string }> => {
     const items = await this.fileDAO.findNextEntries()
 
-    if (!items.length) throw new NoMoreEntriesException('No more ipfsHashes to batch')
+    if (!items.length) throw new NoMoreEntriesException('No more ipfsFilesHashes to batch')
 
     const ipfsFileHashes = items.map(x => x.ipfsFileHash)
     const emptyDirectoryHash = await this.ipfs.createEmptyDirectory()

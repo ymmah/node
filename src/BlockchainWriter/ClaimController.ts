@@ -54,18 +54,18 @@ export class ClaimController {
     logger.trace('Retrieving Next Hash To Timestamp')
 
     const entry = await this.collection.findOne({ txId: null })
-    const hash = entry && entry.ipfsDirectoryHash
+    const ipfsDirectoryHash = entry && entry.ipfsDirectoryHash
 
-    this.logger.trace({ hash }, 'Next Hash To Timestamp Retrieved')
+    this.logger.trace({ ipfsDirectoryHash }, 'Next Hash To Timestamp Retrieved')
 
-    if (!hash) return
+    if (!ipfsDirectoryHash) return
 
     try {
-      await this.timestamp(hash)
+      await this.timestamp(ipfsDirectoryHash)
     } catch (exception) {
       logger.warn(
         {
-          hash,
+          ipfsDirectoryHash,
           exception,
         },
         'Uncaught Exception While Timestamping Hash'
