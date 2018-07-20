@@ -100,9 +100,9 @@ export class PostWork {
     const body = await response.json()
 
     Expect(body.timestamp).toBeDefined()
-    Expect(body.timestamp.ipfsDirectoryHash).toBeDefined()
-    Expect(body.timestamp.ipfsDirectoryHash.length).toBeDefined()
-    Expect(body.timestamp.ipfsDirectoryHash.length).toBe(46)
+    Expect(body.timestamp.ipfsFileHash).toBeDefined()
+    Expect(body.timestamp.ipfsFileHash.length).toBeDefined()
+    Expect(body.timestamp.ipfsFileHash.length).toBe(46)
   }
 
   @AsyncTest()
