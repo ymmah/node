@@ -32,6 +32,7 @@ export class WorkController {
   }
 
   async getByFilters(worksFilters: WorksFilters = {}): Promise<any> {
+    this.logger.trace({ method: 'getByFilters', worksFilters }, 'Getting Work by Filters from DB')
     const definedFilters = getDefinedFilters(worksFilters)
     return this.collection.find(definedFilters, { fields: { _id: false } }).toArray()
   }
