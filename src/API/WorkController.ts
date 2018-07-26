@@ -4,6 +4,7 @@ import { Collection, Db } from 'mongodb'
 import * as Pino from 'pino'
 
 import { childWithFileName } from 'Helpers/Logging'
+import { getDefinedFilters } from 'Helpers/getDefinedFilters'
 import { Exchange } from 'Messaging/Messages'
 import { Messaging } from 'Messaging/Messaging'
 
@@ -31,9 +32,8 @@ export class WorkController {
   }
 
   async getByFilters(worksFilters: WorksFilters = {}): Promise<any> {
-    const definedFilters = Object.entries(worksFilters)
-      .filter(([key, value]) => value !== undefined)
-      .toObject()
+    this.logger.trace({ method: 'getByFilters', worksFilters }, 'Getting Work by Filters from DB')
+    const definedFilters = getDefinedFilters(worksFilters)
     return this.collection.find(definedFilters, { fields: { _id: false } }).toArray()
   }
 
