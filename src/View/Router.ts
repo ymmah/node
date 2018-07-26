@@ -37,7 +37,6 @@ export class Router {
     await this.messaging.consume(Exchange.BatchWriterCreateNextBatchSuccess, this.onBatchWriterCreateNextBatchSuccess)
   }
 
-  // Writing
   onNewClaim = async (message: any) => {
     const messageContent = message.content.toString()
 
@@ -87,7 +86,6 @@ export class Router {
     await this.workController.setTxId(ipfsDirectoryHash, txId)
   }
 
-  // Reading
   onPoetTimestampsDownloaded = async (poetTimestamps: ReadonlyArray<PoetTimestamp>) => {
     const logger = this.logger.child({ method: 'onPoetTimestampsDownloaded' })
 

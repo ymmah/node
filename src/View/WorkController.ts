@@ -20,7 +20,6 @@ export class WorkController {
     this.workCollection = this.db.collection('works')
   }
 
-  // Writing
   createWork = async (work: Work): Promise<void> => {
     this.logger.trace({ work }, 'Creating Work')
 
@@ -63,8 +62,6 @@ export class WorkController {
       { $set: { 'timestamp.transactionId': transactionId } }
     )
   }
-
-  // Reading
 
   async upsertTimestamps(poetTimestamps: ReadonlyArray<PoetTimestamp>) {
     this.logger.trace({ poetTimestamps }, 'Upserting Po.et Timestamps')
