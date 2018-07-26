@@ -2,7 +2,7 @@ import { describe } from 'riteway'
 
 import { getDefinedFilters } from './getDefinedFilters'
 
-describe('RequestValidationMiddleware', async (should: any) => {
+describe('getDefinedFilters', async (should: any) => {
   const { assert } = should('')
 
   assert({
@@ -32,7 +32,7 @@ describe('RequestValidationMiddleware', async (should: any) => {
   {
     const query: { publicKey: string, badKey: any } = { publicKey: 'test', badKey: undefined }
     assert({
-      given: 'object with a defined key and an undefined key',
+      given: 'object with a accepted key and an unwanted key',
       should: 'return an object with the defined key',
       actual: getDefinedFilters(query),
       expected: { publicKey: 'test' }
