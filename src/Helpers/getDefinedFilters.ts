@@ -5,9 +5,9 @@ interface Query {
   readonly publicKey?: string
 }
 
-export const getDefinedFilters = (worksFilters: Query = {}): Query => {
-  const definedFilters = Object.entries(worksFilters)
-    .filter(([key, value]) => value !== undefined)
-    .toObject()
-  return definedFilters
-}
+const filters: ReadonlyArray<string> = ['publicKey']
+
+export const getDefinedFilters = (worksFilters: Query = {}): Query => Object.entries(worksFilters)
+  .filter(([key, value]) => value !== undefined && filters.includes(key))
+  .toObject()
+
