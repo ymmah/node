@@ -45,8 +45,8 @@ export class BatchReader {
     this.service = this.container.get('Service')
     await this.service.start()
 
-    const directoryDAO: DatabaseMongo = this.container.get('DatabaseMongo')
-    await directoryDAO.start()
+    const database: DatabaseMongo = this.container.get('DatabaseMongo')
+    await database.start()
 
     this.logger.info('BatchReader Started')
   }
