@@ -7,7 +7,8 @@ import { Messaging } from 'Messaging/Messaging'
 
 import { BatchReaderConfiguration } from './BatchReaderConfiguration'
 import { ClaimController } from './ClaimController'
-import { DirectoryDAO } from './DirectoryDAO'
+import { Database } from './Database'
+import { DatabaseMongo } from './DatabaseMongo'
 import { IPFS } from './IPFS'
 import { IPFSConfiguration } from './IPFSConfiguration'
 import { Router } from './Router'
@@ -43,7 +44,8 @@ export class BatchReader {
 
     this.service = this.container.get('Service')
     await this.service.start()
-    const directoryDAO: DirectoryDAO = this.container.get('DirectoryDAO')
+
+    const directoryDAO: DatabaseMongo = this.container.get('DatabaseMongo')
     await directoryDAO.start()
 
     this.logger.info('BatchReader Started')
@@ -54,7 +56,7 @@ export class BatchReader {
     this.container.bind<ClaimController>('ClaimController').to(ClaimController)
     this.container.bind<Collection>('directoryCollection').toConstantValue(this.dbConnection.collection('batchReader'))
     this.container.bind<Db>('DB').toConstantValue(this.dbConnection)
-    this.container.bind<DirectoryDAO>('DirectoryDAO').to(DirectoryDAO)
+    this.container.bind<Database>('Database').to(DatabaseMongo)
     this.container.bind<IPFS>('IPFS').to(IPFS)
     this.container.bind<IPFSConfiguration>('IPFSConfiguration').toConstantValue({
       ipfsUrl: this.configuration.ipfsUrl,
