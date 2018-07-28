@@ -1,5 +1,5 @@
 import { inject, injectable } from 'inversify'
-import { Collection, InsertWriteOpResult } from 'mongodb'
+import { Collection, InsertWriteOpResult, UpdateWriteOpResult } from 'mongodb'
 
 import { ErrorCodes } from 'Helpers/MongoDB'
 import { minutesToMiliseconds } from 'Helpers/Time'
@@ -25,11 +25,11 @@ type findNextEntry = (
   }
 ) => Promise<Entry>
 
-type setEntrySuccessTime = (x: Entry) => Promise<any>
+type setEntrySuccessTime = (x: Entry) => Promise<UpdateWriteOpResult>
 
-type incEntryAttempts = (x: Entry) => Promise<any>
+type incEntryAttempts = (x: Entry) => Promise<UpdateWriteOpResult>
 
-type updateFileHashes = (x: Entry) => Promise<any>
+type updateFileHashes = (x: Entry) => Promise<UpdateWriteOpResult>
 
 @injectable()
 export class DirectoryDAO {
