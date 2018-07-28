@@ -1,6 +1,7 @@
 import { inject, injectable } from 'inversify'
 
 import { asyncPipe } from 'Helpers/AsyncPipe'
+import { PoetTimestamp } from 'Interfaces'
 
 import { Database } from './Database'
 import { IPFS } from './IPFS'
@@ -11,7 +12,9 @@ interface ReadFlowData {
   ipfsFileHashes?: ReadonlyArray<string>
 }
 
-type addEntries = (xs: ReadonlyArray<ReadEntry>) => Promise<void>
+type timestampToReadEntry = (x: PoetTimestamp) => ReadEntry
+
+type addTimestamps = (xs: ReadonlyArray<PoetTimestamp>) => Promise<void>
 
 type readFlow = (x?: ReadFlowData) => Promise<ReadFlowData>
 
@@ -25,7 +28,13 @@ export class ClaimController {
     this.ipfs = ipfs
   }
 
-  addEntries: addEntries = entries => this.db.readEntriesAdd(entries)
+  timestampToReadEntry: timestampToReadEntry = ({ ipfsDirectoryHash }) => ({
+    attempts: 0,
+    ipfsDirectoryHash,
+    ipfsFileHashes: [],
+  })
+
+  addTimestamps: addTimestamps = timestamps => this.db.readEntriesAdd(timestamps.map(this.timestampToReadEntry))
 
   private readonly findNextEntry: readFlow = async () => {
     const readEntry = await this.db.readEntryFindIncomplete()

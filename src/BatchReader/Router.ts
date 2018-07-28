@@ -43,7 +43,7 @@ export class Router {
     )
 
     try {
-      await this.claimController.addEntries(poetTimestamps)
+      await this.claimController.addTimestamps(poetTimestamps)
     } catch (error) {
       logger.error({ error, poetTimestamps }, 'Failed to store directory hashes to DB collection')
     }
@@ -53,7 +53,10 @@ export class Router {
     const logger = this.logger.child({ method: 'onBatchReaderReadNextDirectoryRequest' })
     logger.trace('Read next directory request')
     try {
-      const { ipfsFileHashes, ipfsDirectoryHash } = await this.claimController.readNextDirectory()
+      const {
+        ipfsFileHashes,
+        readEntry: { ipfsDirectoryHash },
+      } = await this.claimController.readNextDirectory()
       await this.messaging.publish(Exchange.BatchReaderReadNextDirectorySuccess, { ipfsDirectoryHash, ipfsFileHashes })
       logger.info({ ipfsDirectoryHash, ipfsFileHashes }, 'Read next directory success')
     } catch (error) {
