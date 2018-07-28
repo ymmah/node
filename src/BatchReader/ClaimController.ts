@@ -44,7 +44,7 @@ export class ClaimController {
   private readonly verifyEntryWasFound: readFlow = async x =>
     x.readEntry ? Promise.resolve(x) : Promise.reject('No entries remaining')
 
-  private readonly incrementEntryAttemtps: readFlow = async ({ readEntry, ...rest }) => {
+  private readonly incrementEntryAttempts: readFlow = async ({ readEntry, ...rest }) => {
     const updatedEntry = { ...readEntry, attempts: readEntry.attempts + 1 }
     await this.db.readEntryUpdate(updatedEntry)
     return { readEntry: updatedEntry, ...rest }
@@ -71,7 +71,7 @@ export class ClaimController {
   public readonly readNextDirectory: readFlow = asyncPipe(
     this.findNextEntry,
     this.verifyEntryWasFound,
-    this.incrementEntryAttemtps,
+    this.incrementEntryAttempts,
     this.getFileHashesFromDirectory,
     this.addFileHashesToEntry,
     this.setEntryComplete
