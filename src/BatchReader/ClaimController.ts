@@ -56,9 +56,15 @@ export class ClaimController {
   }
 
   private readonly addFileHashesToEntry: readFlow = async ({ readEntry, ipfsFileHashes, ...rest }) => {
-    const updatedEntry = { ...readEntry, ipfsFileHashes, successTime: new Date().getTime() }
+    const updatedEntry = { ...readEntry, ipfsFileHashes }
     await this.db.readEntryUpdate(updatedEntry)
     return { readEntry: updatedEntry, ipfsFileHashes, ...rest }
+  }
+
+  private readonly setEntryComplete: readFlow = async ({ readEntry, ...rest }) => {
+    const updatedEntry = { ...readEntry, successTime: new Date().getTime() }
+    await this.db.readEntryUpdate(updatedEntry)
+    return { readEntry, ...rest }
   }
 
   // tslint:disable-next-line
@@ -67,6 +73,7 @@ export class ClaimController {
     this.verifyEntryWasFound,
     this.incrementEntryAttemtps,
     this.getFileHashesFromDirectory,
-    this.addFileHashesToEntry
+    this.addFileHashesToEntry,
+    this.setEntryComplete
   )
 }
