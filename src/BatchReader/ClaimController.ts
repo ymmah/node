@@ -55,7 +55,7 @@ export class ClaimController {
   }
 
   // tslint:disable-next-line
-  readNextDirectory: readFlow = asyncPipe(
+  public readonly readNextDirectory: readFlow = asyncPipe(
     this.findNextEntry,
     this.verifyEntryWasFound,
     this.incEntryAttempts,
