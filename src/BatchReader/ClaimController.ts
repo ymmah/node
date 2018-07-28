@@ -54,6 +54,7 @@ export class ClaimController {
     return { ipfsDirectoryHash, ...rest }
   }
 
+  // tslint:disable-next-line
   readNextDirectory: readFlow = asyncPipe(
     this.findNextEntry,
     this.verifyEntryWasFound,
