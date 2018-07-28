@@ -44,18 +44,18 @@ export class ClaimController {
   private readonly verifyEntryWasFound: readFlow = async x =>
     x.readEntry ? Promise.resolve(x) : Promise.reject('No entries remaining')
 
-  private readonly incEntryAttempts: readFlow = async ({ readEntry, ...rest }) => {
+  private readonly incrementEntryAttemtps: readFlow = async ({ readEntry, ...rest }) => {
     const updatedEntry = { ...readEntry, attempts: readEntry.attempts + 1 }
     await this.db.readEntryUpdate(updatedEntry)
     return { readEntry: updatedEntry, ...rest }
   }
 
-  private readonly getDirectoriesFileHashes: readFlow = async ({ readEntry, ...rest }) => {
+  private readonly getFileHashesFromDirectory: readFlow = async ({ readEntry, ...rest }) => {
     const ipfsFileHashes = await this.ipfs.getDirectoryFileHashes(readEntry.ipfsDirectoryHash)
     return { readEntry, ipfsFileHashes, ...rest }
   }
 
-  private readonly updateFileHashes: readFlow = async ({ readEntry, ipfsFileHashes, ...rest }) => {
+  private readonly addFileHashesToEntry: readFlow = async ({ readEntry, ipfsFileHashes, ...rest }) => {
     const updatedEntry = { ...readEntry, ipfsFileHashes, successTime: new Date().getTime() }
     await this.db.readEntryUpdate(updatedEntry)
     return { readEntry: updatedEntry, ipfsFileHashes, ...rest }
@@ -65,8 +65,8 @@ export class ClaimController {
   public readonly readNextDirectory: readFlow = asyncPipe(
     this.findNextEntry,
     this.verifyEntryWasFound,
-    this.incEntryAttempts,
-    this.getDirectoriesFileHashes,
-    this.updateFileHashes
+    this.incrementEntryAttemtps,
+    this.getFileHashesFromDirectory,
+    this.addFileHashesToEntry
   )
 }
