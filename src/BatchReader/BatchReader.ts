@@ -1,5 +1,4 @@
 import { Container } from 'inversify'
-import { Db, MongoClient, Collection } from 'mongodb'
 import * as Pino from 'pino'
 
 import { createModuleLogger } from 'Helpers/Logging'
@@ -19,7 +18,7 @@ export class BatchReader {
   private readonly logger: Pino.Logger
   private readonly configuration: BatchReaderConfiguration
   private readonly container = new Container()
-  private dbConnection: Db
+  private database: Database
   private router: Router
   private messaging: Messaging
   private service: Service
@@ -31,8 +30,6 @@ export class BatchReader {
 
   async start() {
     this.logger.info({ configuration: this.configuration }, 'BatchReader Starting')
-    const mongoClient = await MongoClient.connect(this.configuration.dbUrl)
-    this.dbConnection = await mongoClient.db()
 
     this.messaging = new Messaging(this.configuration.rabbitmqUrl)
     await this.messaging.start()
@@ -45,8 +42,8 @@ export class BatchReader {
     this.service = this.container.get('Service')
     await this.service.start()
 
-    const database: DatabaseMongo = this.container.get('DatabaseMongo')
-    await database.start()
+    this.database = this.container.get('DatabaseMongo')
+    await this.database.start()
 
     this.logger.info('BatchReader Started')
   }
@@ -54,8 +51,6 @@ export class BatchReader {
   initializeContainer() {
     this.container.bind<Pino.Logger>('Logger').toConstantValue(this.logger)
     this.container.bind<ClaimController>('ClaimController').to(ClaimController)
-    this.container.bind<Collection>('directoryCollection').toConstantValue(this.dbConnection.collection('batchReader'))
-    this.container.bind<Db>('DB').toConstantValue(this.dbConnection)
     this.container.bind<Database>('Database').to(DatabaseMongo)
     this.container.bind<IPFS>('IPFS').to(IPFS)
     this.container.bind<IPFSConfiguration>('IPFSConfiguration').toConstantValue({
