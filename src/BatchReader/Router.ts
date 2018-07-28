@@ -53,9 +53,7 @@ export class Router {
     const logger = this.logger.child({ method: 'onBatchReaderReadNextDirectoryRequest' })
     logger.trace('Read next directory request')
     try {
-      const result = await this.claimController.readNextDirectory()
-      if (!result) return
-      const { ipfsFileHashes, ipfsDirectoryHash } = result
+      const { ipfsFileHashes, ipfsDirectoryHash } = await this.claimController.readNextDirectory()
       await this.messaging.publish(Exchange.BatchReaderReadNextDirectorySuccess, { ipfsDirectoryHash, ipfsFileHashes })
       logger.info({ ipfsDirectoryHash, ipfsFileHashes }, 'Read next directory success')
     } catch (error) {

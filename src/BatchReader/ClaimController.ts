@@ -1,8 +1,18 @@
 import { inject, injectable } from 'inversify'
 import { InsertWriteOpResult } from 'mongodb'
 
+import { asyncPipe } from 'Helpers/AsyncPipe'
 import { DirectoryDAO } from './DirectoryDAO'
 import { IPFS } from './IPFS'
+
+interface ReadFlowData {
+  ipfsDirectoryHash?: string
+  ipfsFileHashes?: ReadonlyArray<string>
+}
+
+type addEntries = (xs: ReadonlyArray<{ ipfsDirectoryHash: string }>) => Promise<InsertWriteOpResult>
+
+type readFlow = (x?: ReadFlowData) => Promise<ReadFlowData>
 
 @injectable()
 export class ClaimController {
@@ -14,17 +24,42 @@ export class ClaimController {
     this.ipfs = ipfs
   }
 
-  addEntries = (entries: ReadonlyArray<{ ipfsDirectoryHash: string }>): Promise<InsertWriteOpResult> =>
-    this.directoryDAO.addEntries(entries)
+  addEntries: addEntries = entries => this.directoryDAO.addEntries(entries)
 
-  readNextDirectory = async (): Promise<{ ipfsDirectoryHash: string; ipfsFileHashes: ReadonlyArray<string> }> => {
-    const collectionItem = await this.directoryDAO.findNextEntry()
-    if (!collectionItem) return
-    const { ipfsDirectoryHash } = collectionItem
-    await this.directoryDAO.incEntryAttempts({ ipfsDirectoryHash })
-    const ipfsFileHashes = await this.ipfs.getDirectoryFileHashes(ipfsDirectoryHash)
-    await this.directoryDAO.updateFileHashes({ ipfsDirectoryHash, ipfsFileHashes })
-    await this.directoryDAO.setEntrySuccessTime({ ipfsDirectoryHash })
-    return { ipfsDirectoryHash, ipfsFileHashes }
+  private readonly findNextEntry: readFlow = async () => {
+    const { ipfsDirectoryHash } = await this.directoryDAO.findNextEntry()
+    return { ipfsDirectoryHash }
   }
+
+  private readonly verifyEntryWasFound: readFlow = async x =>
+    x.ipfsDirectoryHash ? Promise.resolve(x) : Promise.reject('No entries remaining')
+
+  private readonly incEntryAttempts: readFlow = async ({ ipfsDirectoryHash, ...rest }) => {
+    await this.directoryDAO.incEntryAttempts({ ipfsDirectoryHash })
+    return { ipfsDirectoryHash, ...rest }
+  }
+
+  private readonly getDirectoriesFileHashes: readFlow = async ({ ipfsDirectoryHash, ...rest }) => {
+    const ipfsFileHashes = await this.ipfs.getDirectoryFileHashes(ipfsDirectoryHash)
+    return { ipfsDirectoryHash, ipfsFileHashes, ...rest }
+  }
+
+  private readonly updateFileHashes: readFlow = async ({ ipfsDirectoryHash, ipfsFileHashes, ...rest }) => {
+    await this.directoryDAO.updateFileHashes({ ipfsDirectoryHash, ipfsFileHashes })
+    return { ipfsDirectoryHash, ipfsFileHashes, ...rest }
+  }
+
+  private readonly setEntrySuccessTime: readFlow = async ({ ipfsDirectoryHash, ...rest }) => {
+    await this.directoryDAO.setEntrySuccessTime({ ipfsDirectoryHash })
+    return { ipfsDirectoryHash, ...rest }
+  }
+
+  readNextDirectory: readFlow = asyncPipe(
+    this.findNextEntry,
+    this.verifyEntryWasFound,
+    this.incEntryAttempts,
+    this.getDirectoriesFileHashes,
+    this.updateFileHashes,
+    this.setEntrySuccessTime
+  )
 }
