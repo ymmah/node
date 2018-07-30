@@ -5,18 +5,18 @@ import { childWithFileName } from 'Helpers/Logging'
 import { PoetTimestamp } from 'Interfaces'
 import { Messaging } from 'Messaging/Messaging'
 
-import { BatchReaderRequest } from './BatchReaderRequest'
+import { InteractorRequest } from './InteractorRequest'
 
 @injectable()
-export class BatchReaderController {
+export class ControllerRequest {
   private readonly logger: Pino.Logger
   private readonly messaging: Messaging
-  private readonly request: BatchReaderRequest
+  private readonly request: InteractorRequest
 
   constructor(
     @inject('Logger') logger: Pino.Logger,
     @inject('Messaging') messaging: Messaging,
-    @inject('BatchReaderRequest') request: BatchReaderRequest
+    @inject('InteractorRequest') request: InteractorRequest
   ) {
     this.logger = childWithFileName(logger, __filename)
     this.messaging = messaging

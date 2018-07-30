@@ -4,20 +4,20 @@ import { Db, MongoClient, Collection } from 'mongodb'
 import { ErrorCodes } from 'Helpers/MongoDB'
 import { minutesToMiliseconds } from 'Helpers/Time'
 
-import { BatchEntry } from './BatchEntry'
-import { BatchReaderDatabase } from './BatchReaderDatabase'
+import { InteractorBatchEntry } from './InteractorBatchEntry'
+import { InteractorDatabase } from './InteractorDatabase'
 
-export interface BatchReaderDatabaseMongoConfiguration {
+export interface DatabaseMongoConfiguration {
   readonly dbUrl: string
 }
 
 @injectable()
-export class BatchReaderDatabaseMongo implements BatchReaderDatabase {
-  private readonly configuration: BatchReaderDatabaseMongoConfiguration
+export class DatabaseMongo implements InteractorDatabase {
+  private readonly configuration: DatabaseMongoConfiguration
   private db: Db
   private readEntries: Collection
 
-  constructor(@inject('configuration') configuration: BatchReaderDatabaseMongoConfiguration) {
+  constructor(@inject('configuration') configuration: DatabaseMongoConfiguration) {
     this.configuration = configuration
   }
 
@@ -28,10 +28,10 @@ export class BatchReaderDatabaseMongo implements BatchReaderDatabase {
     await this.readEntries.createIndex({ ipfsDirectoryHash: 1 }, { unique: true })
   }
 
-  readonly batchEntriesAdd: BatchReaderDatabase['batchEntriesAdd'] = async (entries = []) => {
+  readonly batchEntriesAdd: InteractorDatabase['batchEntriesAdd'] = async (entries = []) => {
     await this.readEntries
       .insertMany(
-        entries.map((entry: BatchEntry) => ({
+        entries.map((entry: InteractorBatchEntry) => ({
           attempts: 0,
           ipfsDirectoryHash: entry.ipfsDirectoryHash,
           ipfsFileHashes: [],
@@ -43,7 +43,7 @@ export class BatchReaderDatabaseMongo implements BatchReaderDatabase {
       .ignoreError(error => error.code === ErrorCodes.DuplicateKey)
   }
 
-  readonly batchEntryFindIncomplete: BatchReaderDatabase['batchEntryFindIncomplete'] = ({
+  readonly interactorBatchEntryFindIncomplete: InteractorDatabase['interactorBatchEntryFindIncomplete'] = ({
     currentTime = new Date().getTime(),
     retryDelay = minutesToMiliseconds(20),
     maxAttempts = 20,
@@ -67,15 +67,15 @@ export class BatchReaderDatabaseMongo implements BatchReaderDatabase {
       ],
     })
 
-  readonly batchEntryUpdate: BatchReaderDatabase['batchEntryUpdate'] = async BatchEntry => {
+  readonly interactorBatchEntryUpdate: InteractorDatabase['interactorBatchEntryUpdate'] = async InteractorBatchEntry => {
     await this.readEntries.updateOne(
-      { _id: BatchEntry._id },
+      { _id: InteractorBatchEntry._id },
       {
-        attempts: BatchEntry.attempts,
-        ipfsDirectoryHash: BatchEntry.ipfsDirectoryHash,
-        ipfsFileHashes: BatchEntry.ipfsFileHashes,
-        successTime: BatchEntry.successTime,
-        lastAttemptTime: BatchEntry.lastAttemptTime,
+        attempts: InteractorBatchEntry.attempts,
+        ipfsDirectoryHash: InteractorBatchEntry.ipfsDirectoryHash,
+        ipfsFileHashes: InteractorBatchEntry.ipfsFileHashes,
+        successTime: InteractorBatchEntry.successTime,
+        lastAttemptTime: InteractorBatchEntry.lastAttemptTime,
       }
     )
   }

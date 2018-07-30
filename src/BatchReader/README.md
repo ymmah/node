@@ -22,22 +22,32 @@ The following configuration properties affect the BatchReader Module:
 #### `BatchReader.ts`   
 The entry point for the module.
 
-#### `BatchReaderControl.ts`
-Handles the business logic of claims.
+#### `ControllerRequest.ts`
+Takes requests and passes them to the Interactor.
 
-#### `Database.ts`
-A database Interface required by the business logic ( Claim Controller ).
+#### `ControllerResponse.ts`
+Receives response messages from the Interfactor through the InteractorResponse interface.
+
+#### `InteractorBatchReader.ts`
+Business Logic, no direct dependencies, everything else should be a plugin and plugin into here. Implements the InteractorRequest interface.
+
+#### `InteractorInteractorRetry.ts`
+InteractorRetry properties
+
+#### `InteractorRequest.ts`
+Request Interface
+
+#### `InteractorResponse.ts`
+Response Interface
+
+#### `InteractorStorage.ts`
+Storage Interface
+
+#### `InteractorDatabase.ts`
+Database Interface
 
 #### `DatabaseMongo.ts`
-A mongo database plugin that implements the Database interface.
+A Mongo database mapper that implements the InteractorDatabase interface.
 
-#### `IPFS.ts`
-Implements an API for the IPFS service.
-
-#### `Router.ts`   
-Handles the communication between the different modules.
-
-In the previous service structure, the router would subscribe to events and call methods on controllers. Those controllers would then publish new messages. In the new system, all the subscribing/publishing of messages is handled by the router. This provides more clarity and flexibility.
-
-#### `Service.ts`
-Fires messages based on intervals and provides the ability to stop/start the intervals.
+#### `StorageIPFS.ts`
+IPFS storage mapper that implements the InteractorStorage interface.

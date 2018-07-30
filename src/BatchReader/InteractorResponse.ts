@@ -6,6 +6,6 @@ export interface BatchReadResult {
   ipfsFileHashes: FileHash
 }
 
-export interface BatchReaderResponse {
+export interface InteractorResponse {
   batchReadResult: (xs: BatchReadResult) => Promise<void>
 }

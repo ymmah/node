@@ -4,23 +4,23 @@ import * as Pino from 'pino'
 import { createModuleLogger } from 'Helpers/Logging'
 import { Messaging } from 'Messaging/Messaging'
 
-import { BatchReaderController } from './BatchReaderController'
-import { BatchReaderDatabase } from './BatchReaderDatabase'
-import { BatchReaderDatabaseMongo, BatchReaderDatabaseMongoConfiguration } from './BatchReaderDatabaseMongo'
-import { BatchReaderPresenter } from './BatchReaderPresenter'
-import { BatchReaderReader, BatchReaderReaderConfiguration } from './BatchReaderReader'
-import { BatchReaderRequest } from './BatchReaderRequest'
-import { BatchReaderResponse } from './BatchReaderResponse'
-import { BatchReaderStorage } from './BatchReaderStorage'
-import { BatchReaderStorageIPFS, BatchReaderStorageIPFSConfiguration } from './BatchReaderStorageIPFS'
+import { ControllerRequest } from './ControllerRequest'
+import { ControllerResponse } from './ControllerResponse'
+import { DatabaseMongo, DatabaseMongoConfiguration } from './DatabaseMongo'
+import { InteractorBatchReader, InteractorBatchReaderConfiguration } from './InteractorBatchReader'
+import { InteractorDatabase } from './InteractorDatabase'
+import { InteractorRequest } from './InteractorRequest'
+import { InteractorResponse } from './InteractorResponse'
+import { InteractorStorage } from './InteractorStorage'
+import { StorageIPFS, StorageIPFSConfiguration } from './StorageIPFS'
 
 import { LoggingConfiguration } from 'Configuration'
 
 export interface BatchReaderConfiguration
   extends LoggingConfiguration,
-    BatchReaderReaderConfiguration,
-    BatchReaderStorageIPFSConfiguration,
-    BatchReaderDatabaseMongoConfiguration {
+    InteractorBatchReaderConfiguration,
+    StorageIPFSConfiguration,
+    DatabaseMongoConfiguration {
   readonly rabbitmqUrl: string
 }
 
@@ -28,10 +28,10 @@ export class BatchReader {
   private readonly logger: Pino.Logger
   private readonly configuration: BatchReaderConfiguration
   private readonly container = new Container()
-  private database: BatchReaderDatabase
+  private database: InteractorDatabase
   private messaging: Messaging
-  private control: BatchReaderRequest
-  private controller: BatchReaderController
+  private interactor: InteractorRequest
+  private requestController: ControllerRequest
 
   constructor(configuration: BatchReaderConfiguration) {
     this.configuration = configuration
@@ -46,13 +46,13 @@ export class BatchReader {
 
     this.initializeContainer()
 
-    this.controller = this.container.get('BatchReaderController')
-    await this.controller.start()
+    this.requestController = this.container.get('ControllerRequest')
+    await this.requestController.start()
 
-    this.control = this.container.get('BatchReaderRequest')
-    await this.control.start()
+    this.interactor = this.container.get('InteractorRequest')
+    await this.interactor.start()
 
-    this.database = this.container.get('BatchReaderDatabase')
+    this.database = this.container.get('InteractorDatabase')
     await this.database.start()
 
     this.logger.info('BatchReader Started')
@@ -60,11 +60,11 @@ export class BatchReader {
 
   initializeContainer() {
     this.container.bind<Pino.Logger>('Logger').toConstantValue(this.logger)
-    this.container.bind<BatchReaderRequest>('BatchReaderRequest').to(BatchReaderReader)
-    this.container.bind<BatchReaderController>('BatchReaderController').to(BatchReaderController)
-    this.container.bind<BatchReaderDatabase>('BatchReaderDatabase').to(BatchReaderDatabaseMongo)
-    this.container.bind<BatchReaderStorage>('BatchReaderStorage').to(BatchReaderStorageIPFS)
-    this.container.bind<BatchReaderResponse>('BatchReaderResponse').to(BatchReaderPresenter)
+    this.container.bind<InteractorRequest>('InteractorRequest').to(InteractorBatchReader)
+    this.container.bind<ControllerRequest>('ControllerRequest').to(ControllerRequest)
+    this.container.bind<InteractorDatabase>('InteractorDatabase').to(DatabaseMongo)
+    this.container.bind<InteractorStorage>('InteractorStorage').to(StorageIPFS)
+    this.container.bind<InteractorResponse>('InteractorResponse').to(ControllerResponse)
     this.container.bind<Messaging>('Messaging').toConstantValue(this.messaging)
   }
 }
