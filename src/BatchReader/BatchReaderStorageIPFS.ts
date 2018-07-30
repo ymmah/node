@@ -1,7 +1,9 @@
 import { inject, injectable } from 'inversify'
 import fetch from 'node-fetch'
 
-import { IPFSConfiguration } from './IPFSConfiguration'
+export interface BatchReaderStorageIPFSConfiguration {
+  readonly ipfsUrl: string
+}
 
 enum Type {
   File = 'File',
@@ -37,10 +39,10 @@ type getDirectoryFileHashes = (s: string) => Promise<ReadonlyArray<string>>
 type ls = (s: string) => Promise<LSResult>
 
 @injectable()
-export class IPFS {
+export class BatchReaderStorageIPFS implements BatchReaderStorageIPFS {
   private readonly url: string
 
-  constructor(@inject('IPFSConfiguration') configuration: IPFSConfiguration) {
+  constructor(@inject('BatchReaderStorageIPFSConfiguration') configuration: BatchReaderStorageIPFSConfiguration) {
     this.url = configuration.ipfsUrl
   }
 
@@ -49,7 +51,7 @@ export class IPFS {
     return response.Objects[hash].Links.map(x => x.Hash)
   }
 
-  ls: ls = async (hash: string) => {
+  private ls: ls = async (hash: string) => {
     const response = await fetch(`${this.url}/api/v0/file/ls?arg=${hash}`)
     const json = await response.json()
     return json

@@ -22,7 +22,7 @@ The following configuration properties affect the BatchReader Module:
 #### `BatchReader.ts`   
 The entry point for the module.
 
-#### `ClaimController.ts`
+#### `BatchReaderControl.ts`
 Handles the business logic of claims.
 
 #### `Database.ts`

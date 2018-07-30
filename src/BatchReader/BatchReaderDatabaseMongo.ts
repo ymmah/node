@@ -4,17 +4,20 @@ import { Db, MongoClient, Collection } from 'mongodb'
 import { ErrorCodes } from 'Helpers/MongoDB'
 import { minutesToMiliseconds } from 'Helpers/Time'
 
-import { Database } from './Database'
-import { DatabaseConfiguration } from './DatabaseConfiguration'
-import { ReadEntry } from './ReadEntry'
+import { BatchEntry } from './BatchEntry'
+import { BatchReaderDatabase } from './BatchReaderDatabase'
+
+export interface BatchReaderDatabaseMongoConfiguration {
+  readonly dbUrl: string
+}
 
 @injectable()
-export class DatabaseMongo implements Database {
-  private readonly configuration: DatabaseConfiguration
+export class BatchReaderDatabaseMongo implements BatchReaderDatabase {
+  private readonly configuration: BatchReaderDatabaseMongoConfiguration
   private db: Db
   private readEntries: Collection
 
-  constructor(@inject('configuration') configuration: DatabaseConfiguration) {
+  constructor(@inject('configuration') configuration: BatchReaderDatabaseMongoConfiguration) {
     this.configuration = configuration
   }
 
@@ -25,10 +28,10 @@ export class DatabaseMongo implements Database {
     await this.readEntries.createIndex({ ipfsDirectoryHash: 1 }, { unique: true })
   }
 
-  readonly readEntriesAdd: Database['readEntriesAdd'] = async (entries = []) => {
+  readonly batchEntriesAdd: BatchReaderDatabase['batchEntriesAdd'] = async (entries = []) => {
     await this.readEntries
       .insertMany(
-        entries.map((entry: ReadEntry) => ({
+        entries.map((entry: BatchEntry) => ({
           attempts: 0,
           ipfsDirectoryHash: entry.ipfsDirectoryHash,
           ipfsFileHashes: [],
@@ -40,7 +43,7 @@ export class DatabaseMongo implements Database {
       .ignoreError(error => error.code === ErrorCodes.DuplicateKey)
   }
 
-  readonly readEntryFindIncomplete: Database['readEntryFindIncomplete'] = ({
+  readonly batchEntryFindIncomplete: BatchReaderDatabase['batchEntryFindIncomplete'] = ({
     currentTime = new Date().getTime(),
     retryDelay = minutesToMiliseconds(20),
     maxAttempts = 20,
@@ -64,15 +67,15 @@ export class DatabaseMongo implements Database {
       ],
     })
 
-  readonly readEntryUpdate: Database['readEntryUpdate'] = async readEntry => {
+  readonly batchEntryUpdate: BatchReaderDatabase['batchEntryUpdate'] = async BatchEntry => {
     await this.readEntries.updateOne(
-      { _id: readEntry._id },
+      { _id: BatchEntry._id },
       {
-        attempts: readEntry.attempts,
-        ipfsDirectoryHash: readEntry.ipfsDirectoryHash,
-        ipfsFileHashes: readEntry.ipfsFileHashes,
-        successTime: readEntry.successTime,
-        lastAttemptTime: readEntry.lastAttemptTime,
+        attempts: BatchEntry.attempts,
+        ipfsDirectoryHash: BatchEntry.ipfsDirectoryHash,
+        ipfsFileHashes: BatchEntry.ipfsFileHashes,
+        successTime: BatchEntry.successTime,
+        lastAttemptTime: BatchEntry.lastAttemptTime,
       }
     )
   }
