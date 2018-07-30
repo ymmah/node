@@ -8,7 +8,7 @@ import { Messaging } from 'Messaging/Messaging'
 import { BatchReaderResponse } from './BatchReaderResponse'
 
 @injectable()
-export class BatchReaderResponsePresenter implements BatchReaderResponse {
+export class BatchReaderPresenter implements BatchReaderResponse {
   private readonly logger: Pino.Logger
   private readonly messaging: Messaging
 

@@ -8,7 +8,7 @@ import { Messaging } from 'Messaging/Messaging'
 import { BatchReaderRequest } from './BatchReaderRequest'
 
 @injectable()
-export class BatchReaderRequestController {
+export class BatchReaderController {
   private readonly logger: Pino.Logger
   private readonly messaging: Messaging
   private readonly request: BatchReaderRequest

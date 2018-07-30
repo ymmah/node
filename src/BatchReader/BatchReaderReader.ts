@@ -17,12 +17,12 @@ interface ReadNextDirectoryArg {
 
 type readNextDirectory = (x?: ReadNextDirectoryArg) => Promise<ReadNextDirectoryArg>
 
-export interface BatchReaderRequestControlConfiguration {
+export interface BatchReaderReaderConfiguration {
   readonly readNextDirectoryIntervalInSeconds: number
 }
 
 @injectable()
-export class BatchReaderRequestControl implements BatchReaderRequest {
+export class BatchReaderReader implements BatchReaderRequest {
   private readonly db: BatchReaderDatabase
   private readonly storage: BatchReaderStorage
   private readonly response: BatchReaderResponse
@@ -32,7 +32,7 @@ export class BatchReaderRequestControl implements BatchReaderRequest {
     @inject('BatchReaderDatabase') db: BatchReaderDatabase,
     @inject('BatchReaderStorage') storage: BatchReaderStorage,
     @inject('BatchReaderResponse') response: BatchReaderResponse,
-    @inject('BatchReaderRequestControlConfiguration') configuration: BatchReaderRequestControlConfiguration
+    @inject('BatchReaderReaderConfiguration') configuration: BatchReaderReaderConfiguration
   ) {
     this.db = db
     this.storage = storage

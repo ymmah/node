@@ -4,13 +4,13 @@ import * as Pino from 'pino'
 import { createModuleLogger } from 'Helpers/Logging'
 import { Messaging } from 'Messaging/Messaging'
 
+import { BatchReaderController } from './BatchReaderController'
 import { BatchReaderDatabase } from './BatchReaderDatabase'
 import { BatchReaderDatabaseMongo, BatchReaderDatabaseMongoConfiguration } from './BatchReaderDatabaseMongo'
+import { BatchReaderPresenter } from './BatchReaderPresenter'
+import { BatchReaderReader, BatchReaderReaderConfiguration } from './BatchReaderReader'
 import { BatchReaderRequest } from './BatchReaderRequest'
-import { BatchReaderRequestControl, BatchReaderRequestControlConfiguration } from './BatchReaderRequestControl'
-import { BatchReaderRequestController } from './BatchReaderRequestController'
 import { BatchReaderResponse } from './BatchReaderResponse'
-import { BatchReaderResponsePresenter } from './BatchReaderResponsePresenter'
 import { BatchReaderStorage } from './BatchReaderStorage'
 import { BatchReaderStorageIPFS, BatchReaderStorageIPFSConfiguration } from './BatchReaderStorageIPFS'
 
@@ -18,7 +18,7 @@ import { LoggingConfiguration } from 'Configuration'
 
 export interface BatchReaderConfiguration
   extends LoggingConfiguration,
-    BatchReaderRequestControlConfiguration,
+    BatchReaderReaderConfiguration,
     BatchReaderStorageIPFSConfiguration,
     BatchReaderDatabaseMongoConfiguration {
   readonly rabbitmqUrl: string
@@ -31,7 +31,7 @@ export class BatchReader {
   private database: BatchReaderDatabase
   private messaging: Messaging
   private control: BatchReaderRequest
-  private controller: BatchReaderRequestController
+  private controller: BatchReaderController
 
   constructor(configuration: BatchReaderConfiguration) {
     this.configuration = configuration
@@ -46,7 +46,7 @@ export class BatchReader {
 
     this.initializeContainer()
 
-    this.controller = this.container.get('BatchReaderRequestController')
+    this.controller = this.container.get('BatchReaderController')
     await this.controller.start()
 
     this.control = this.container.get('BatchReaderRequest')
@@ -60,11 +60,11 @@ export class BatchReader {
 
   initializeContainer() {
     this.container.bind<Pino.Logger>('Logger').toConstantValue(this.logger)
-    this.container.bind<BatchReaderRequest>('BatchReaderRequest').to(BatchReaderRequestControl)
-    this.container.bind<BatchReaderRequestController>('BatchReaderRequestController').to(BatchReaderRequestController)
+    this.container.bind<BatchReaderRequest>('BatchReaderRequest').to(BatchReaderReader)
+    this.container.bind<BatchReaderController>('BatchReaderController').to(BatchReaderController)
     this.container.bind<BatchReaderDatabase>('BatchReaderDatabase').to(BatchReaderDatabaseMongo)
     this.container.bind<BatchReaderStorage>('BatchReaderStorage').to(BatchReaderStorageIPFS)
-    this.container.bind<BatchReaderResponse>('BatchReaderResponse').to(BatchReaderResponsePresenter)
+    this.container.bind<BatchReaderResponse>('BatchReaderResponse').to(BatchReaderPresenter)
     this.container.bind<Messaging>('Messaging').toConstantValue(this.messaging)
   }
 }
