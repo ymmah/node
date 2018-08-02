@@ -26,7 +26,7 @@ The entry point for the module.
 Takes requests and passes them to the Interactor.
 
 #### `ControllerResponse.ts`
-Receives response messages from the Interfactor through the InteractorResponse interface.
+Recieves responses from the Interactor and publishes them.
 
 #### `InteractorBatchReader.ts`
 Business Logic, no direct dependencies, everything else should be a plugin and plugin into here. Implements the InteractorRequest interface.
