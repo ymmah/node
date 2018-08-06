@@ -13,6 +13,12 @@ interface WorksFilters {
   readonly limit?: number
 }
 
+interface WorkCount {
+  readonly count: number
+  readonly unread: number
+  readonly works?: ReadonlyArray<string>
+}
+
 @injectable()
 export class WorkController {
   private readonly logger: Pino.Logger
@@ -32,17 +38,18 @@ export class WorkController {
     return this.collection.findOne({ id }, { projection: { _id: false } })
   }
 
-  async getByFilters(worksFilters: WorksFilters = {}): Promise<ReadonlyArray<any>> {
+  async getByFilters(worksFilters: WorksFilters = {}): Promise<WorkCount> {
     this.logger.trace({ method: 'getByFilters', worksFilters }, 'Getting Work by Filters from DB')
     const { offset, limit, ...filters } = worksFilters
-    return this.collection
+    const works = await this.collection
       .find(filters, { projection: { _id: false } })
-      .sort({
-        _id: -1,
-      })
+      .sort({ _id: -1 })
       .skip(offset)
       .limit(limit || 10)
       .toArray()
+    const count = await this.collection.count(filters)
+    const unread = count - offset
+    return { count, unread, works }
   }
 
   async create(work: Work): Promise<void> {
