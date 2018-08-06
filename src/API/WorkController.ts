@@ -16,7 +16,7 @@ interface WorksFilters {
 interface WorkCount {
   readonly count: number
   readonly unread: number
-  readonly works?: ReadonlyArray<string>
+  readonly works: ReadonlyArray<string>
 }
 
 @injectable()
